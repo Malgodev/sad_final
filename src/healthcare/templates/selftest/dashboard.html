@@ -1,0 +1,273 @@
+{% extends 'selftest/base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h2 class="mb-2">
+                        <i class="fas fa-user-md me-2"></i>
+                        Welcome back, {{ patient.user.get_full_name|default:patient.user.username }}!
+                    </h2>
+                    <p class="mb-0">Monitor your health journey with AI-powered insights</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="mb-3">
+                <i class="fas fa-bolt health-icon me-2"></i>
+                Quick Actions
+            </h3>
+        </div>
+        
+        <div class="col-md-12 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-bolt fa-3x text-success"></i>
+                    </div>
+                    <h5 class="card-title">Quick Health Test</h5>
+                    <p class="card-text">Get instant health insights in under 2 minutes with our AI-powered symptom analysis</p>
+                    <a href="{% url 'selftest:quick_test' %}" class="btn btn-success btn-lg">
+                        <i class="fas fa-play me-2"></i>Start Quick Test
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Health Statistics -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="mb-3">
+                <i class="fas fa-chart-line health-icon me-2"></i>
+                Your Health Statistics
+            </h3>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="mb-2">
+                        <i class="fas fa-vial fa-2x text-primary"></i>
+                    </div>
+                    <h3 class="text-primary mb-1">{{ total_tests }}</h3>
+                    <p class="mb-0 small">Total Tests</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="mb-2">
+                        <i class="fas fa-shield-alt fa-2x text-success"></i>
+                    </div>
+                    <h3 class="text-success mb-1">{{ risk_distribution.low }}</h3>
+                    <p class="mb-0 small">Low Risk</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="mb-2">
+                        <i class="fas fa-exclamation-triangle fa-2x text-warning"></i>
+                    </div>
+                    <h3 class="text-warning mb-1">{{ risk_distribution.medium }}</h3>
+                    <p class="mb-0 small">Medium Risk</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="mb-2">
+                        <i class="fas fa-exclamation-circle fa-2x text-danger"></i>
+                    </div>
+                    <h3 class="text-danger mb-1">{{ risk_distribution.high|add:risk_distribution.urgent }}</h3>
+                    <p class="mb-0 small">High/Urgent Risk</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Tests -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Recent Health Tests
+                    </h4>
+                    <a href="{% url 'selftest:test_history' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-list me-1"></i>View All
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if recent_tests %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Risk Level</th>
+                                    <th>Top Prediction</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for test in recent_tests %}
+                                <tr>
+                                    <td>
+                                        <i class="fas fa-calendar me-2"></i>
+                                        {{ test.created_at|date:"M d, Y" }}
+                                        <br>
+                                        <small class="text-muted">{{ test.created_at|time:"g:i A" }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if test.risk_level == 'low' %}bg-success
+                                            {% elif test.risk_level == 'medium' %}bg-warning
+                                            {% elif test.risk_level == 'high' %}bg-danger
+                                            {% else %}bg-dark{% endif %}">
+                                            {% if test.risk_level == 'low' %}<i class="fas fa-shield-alt me-1"></i>
+                                            {% elif test.risk_level == 'medium' %}<i class="fas fa-exclamation-triangle me-1"></i>
+                                            {% elif test.risk_level == 'high' %}<i class="fas fa-exclamation-circle me-1"></i>
+                                            {% else %}<i class="fas fa-ambulance me-1"></i>{% endif %}
+                                            {{ test.get_risk_level_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if test.predicted_diseases %}
+                                            <strong>{{ test.predicted_diseases.0.name }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ test.predicted_diseases.0.confidence }}% confidence</small>
+                                        {% else %}
+                                            <span class="text-muted">No predictions</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'selftest:test_results' test.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye me-1"></i>View Details
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No tests completed yet</h5>
+                        <p class="text-muted">Start your first health assessment to see results here</p>
+                        <a href="{% url 'selftest:quick_test' %}" class="btn btn-primary">
+                            <i class="fas fa-play me-2"></i>Take Your First Test
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Health Tips -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Health Tips & Reminders
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="fas fa-water fa-2x text-info"></i>
+                                </div>
+                                <div>
+                                    <h6>Stay Hydrated</h6>
+                                    <p class="mb-0 small">Drink at least 8 glasses of water daily for optimal health</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="fas fa-running fa-2x text-success"></i>
+                                </div>
+                                <div>
+                                    <h6>Regular Exercise</h6>
+                                    <p class="mb-0 small">Aim for 30 minutes of moderate exercise most days</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="fas fa-bed fa-2x text-primary"></i>
+                                </div>
+                                <div>
+                                    <h6>Quality Sleep</h6>
+                                    <p class="mb-0 small">Get 7-9 hours of quality sleep each night</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="fas fa-user-md fa-2x text-warning"></i>
+                                </div>
+                                <div>
+                                    <h6>Regular Checkups</h6>
+                                    <p class="mb-0 small">Schedule regular visits with your healthcare provider</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add some interactive elements
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate statistics on load
+        const statCards = document.querySelectorAll('.card');
+        statCards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'all 0.5s ease';
+                
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100);
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %} 

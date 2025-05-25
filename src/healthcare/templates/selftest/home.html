@@ -1,0 +1,263 @@
+{% extends 'selftest/base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center py-5">
+                    <h1 class="display-4 mb-3">
+                        <i class="fas fa-brain me-3"></i>
+                        AI-Powered Health Assessment
+                    </h1>
+                    <p class="lead mb-4">{{ message }}</p>
+                    {% if user.is_authenticated %}
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a href="{% url 'selftest:quick_test' %}" class="btn btn-light btn-lg">
+                            <i class="fas fa-bolt me-2"></i>Quick Test (2 mins)
+                        </a>
+                    </div>
+                    {% else %}
+                    <a href="/patient/auth/login/" class="btn btn-light btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login to Start Assessment
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-star health-icon me-2"></i>
+                Advanced Features
+            </h2>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fas fa-robot fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title">AI-Powered Analysis</h5>
+                    <p class="card-text">
+                        Advanced artificial intelligence analyzes your symptoms and provides 
+                        accurate disease predictions with confidence scores.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fas fa-search fa-3x text-success"></i>
+                    </div>
+                    <h5 class="card-title">Smart Symptom Search</h5>
+                    <p class="card-text">
+                        Real-time search through 35+ symptoms with intelligent filtering. 
+                        No page reloads, instant results as you type.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fas fa-shield-alt fa-3x text-warning"></i>
+                    </div>
+                    <h5 class="card-title">Risk Assessment</h5>
+                    <p class="card-text">
+                        4-tier risk system (Low, Medium, High, Urgent) with personalized 
+                        recommendations and specialist referrals.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-cogs health-icon me-2"></i>
+                How It Works
+            </h2>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <span class="badge bg-primary rounded-circle p-3 fs-4">1</span>
+                    </div>
+                    <h6 class="card-title">Select Symptoms</h6>
+                    <p class="card-text small">
+                        Choose from our comprehensive symptom database using smart search
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <span class="badge bg-primary rounded-circle p-3 fs-4">2</span>
+                    </div>
+                    <h6 class="card-title">Rate Severity</h6>
+                    <p class="card-text small">
+                        Rate each symptom from 1-10 with detailed descriptions
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <span class="badge bg-primary rounded-circle p-3 fs-4">3</span>
+                    </div>
+                    <h6 class="card-title">AI Analysis</h6>
+                    <p class="card-text small">
+                        Our AI analyzes patterns and predicts possible conditions
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <span class="badge bg-primary rounded-circle p-3 fs-4">4</span>
+                    </div>
+                    <h6 class="card-title">Get Results</h6>
+                    <p class="card-text small">
+                        Receive detailed analysis with recommendations and next steps
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Section -->
+    {% if user.is_authenticated %}
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-chart-bar health-icon me-2"></i>
+                Your Health Journey
+            </h2>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-primary mb-2">
+                        <i class="fas fa-vial me-2"></i>
+                        <span class="counter">0</span>
+                    </h3>
+                    <p class="mb-0">Tests Completed</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-success mb-2">
+                        <i class="fas fa-heartbeat me-2"></i>
+                        35+
+                    </h3>
+                    <p class="mb-0">Symptoms Available</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-info mb-2">
+                        <i class="fas fa-database me-2"></i>
+                        30+
+                    </h3>
+                    <p class="mb-0">Diseases in Database</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Call to Action -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body text-center py-4">
+                    <h3 class="mb-3">Ready to Start Your Health Assessment?</h3>
+                    <p class="text-muted mb-4">
+                        Get personalized health insights in minutes with our AI-powered system
+                    </p>
+                    
+                    {% if user.is_authenticated %}
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a href="{% url 'selftest:dashboard' %}" class="btn btn-primary">
+                            <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                        </a>
+                        <a href="{% url 'selftest:quick_test' %}" class="btn btn-success">
+                            <i class="fas fa-play me-2"></i>Start Quick Test
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a href="/patient/auth/login/" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </a>
+                        <a href="/patient/auth/register/" class="btn btn-outline-primary">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Animate counters on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const counters = document.querySelectorAll('.counter');
+        
+        counters.forEach(counter => {
+            const target = parseInt(counter.textContent);
+            let current = 0;
+            const increment = target / 50;
+            
+            const updateCounter = () => {
+                if (current < target) {
+                    current += increment;
+                    counter.textContent = Math.ceil(current);
+                    setTimeout(updateCounter, 20);
+                } else {
+                    counter.textContent = target;
+                }
+            };
+            
+            updateCounter();
+        });
+    });
+</script>
+{% endblock %} 

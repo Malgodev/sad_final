@@ -1,0 +1,278 @@
+{% extends 'patient/base.html' %}
+
+{% block title %}Appointment Details - Patient Portal{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'patient:dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'patient:appointment_list' %}">My Appointments</a></li>
+        <li class="breadcrumb-item active">Appointment Details</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <!-- Appointment Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h4 class="mb-0">
+                            <i class="fas fa-calendar-check me-2"></i>
+                            Appointment Details
+                        </h4>
+                    </div>
+                    <div class="col-auto">
+                        {% if appointment.status == 'scheduled' %}
+                            <span class="badge bg-info fs-6">{{ appointment.get_status_display }}</span>
+                        {% elif appointment.status == 'confirmed' %}
+                            <span class="badge bg-success fs-6">{{ appointment.get_status_display }}</span>
+                        {% elif appointment.status == 'completed' %}
+                            <span class="badge bg-success fs-6">{{ appointment.get_status_display }}</span>
+                        {% elif appointment.status == 'cancelled' %}
+                            <span class="badge bg-danger fs-6">{{ appointment.get_status_display }}</span>
+                        {% elif appointment.status == 'no_show' %}
+                            <span class="badge bg-warning fs-6">{{ appointment.get_status_display }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-patient">
+                            <i class="fas fa-calendar me-2"></i>Date & Time
+                        </h6>
+                        <p class="mb-3">
+                            <strong>{{ appointment.appointment_slot.date|date:"l, F d, Y" }}</strong><br>
+                            <span class="text-muted">{{ appointment.appointment_slot.get_slot_type_display }}</span><br>
+                            <small class="text-muted">Duration: 1.5 hours</small>
+                        </p>
+
+                        <h6 class="text-patient">
+                            <i class="fas fa-clipboard-list me-2"></i>Reason for Visit
+                        </h6>
+                        <p class="mb-3">{{ appointment.reason }}</p>
+
+                        {% if appointment.notes %}
+                        <h6 class="text-patient">
+                            <i class="fas fa-sticky-note me-2"></i>Doctor's Notes
+                        </h6>
+                        <div class="alert alert-info">
+                            {{ appointment.notes }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-patient">
+                            <i class="fas fa-info-circle me-2"></i>Appointment Information
+                        </h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Appointment ID:</strong></td>
+                                <td>#{{ appointment.id }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Booked On:</strong></td>
+                                <td>{{ appointment.created_at|date:"M d, Y H:i" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Last Updated:</strong></td>
+                                <td>{{ appointment.updated_at|date:"M d, Y H:i" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Status:</strong></td>
+                                <td>{{ appointment.get_status_display }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="card">
+            <div class="card-body">
+                <div class="d-grid gap-2 d-md-flex">
+                    <a href="{% url 'patient:appointment_list' %}" class="btn btn-outline-patient">
+                        <i class="fas fa-arrow-left me-2"></i>Back to My Appointments
+                    </a>
+                    
+                    {% if appointment.status not in 'completed,cancelled' %}
+                        <a href="{% url 'patient:cancel_appointment' appointment.id %}" class="btn btn-outline-danger">
+                            <i class="fas fa-times me-2"></i>Cancel Appointment
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{% url 'patient:appointment_calendar' %}" class="btn btn-patient">
+                        <i class="fas fa-calendar-plus me-2"></i>Book Another Appointment
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Doctor Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-md me-2"></i>
+                    Doctor Information
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="doctor-avatar mb-3">
+                    <i class="fas fa-user-md fa-4x text-patient"></i>
+                </div>
+                <h5 class="text-patient">Dr. {{ appointment.doctor.user.get_full_name }}</h5>
+                <p class="text-muted mb-3">{{ appointment.doctor.specialization }}</p>
+                
+                <div class="text-start">
+                    <p class="mb-2">
+                        <i class="fas fa-id-card me-2 text-patient"></i>
+                        <strong>License:</strong> {{ appointment.doctor.license_number }}
+                    </p>
+                    <p class="mb-2">
+                        <i class="fas fa-graduation-cap me-2 text-patient"></i>
+                        <strong>Experience:</strong> {{ appointment.doctor.experience_years }} years
+                    </p>
+                    <p class="mb-2">
+                        <i class="fas fa-phone me-2 text-patient"></i>
+                        <strong>Phone:</strong> {{ appointment.doctor.phone }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Appointment Guidelines -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Appointment Guidelines
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if appointment.status == 'scheduled' or appointment.status == 'confirmed' %}
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-clock me-2"></i>Before Your Visit:</h6>
+                        <ul class="mb-0">
+                            <li>Arrive 15 minutes early</li>
+                            <li>Bring valid ID and insurance card</li>
+                            <li>Prepare list of current medications</li>
+                            <li>Write down any questions or concerns</li>
+                        </ul>
+                    </div>
+                {% elif appointment.status == 'completed' %}
+                    <div class="alert alert-success">
+                        <h6><i class="fas fa-check-circle me-2"></i>Visit Completed</h6>
+                        <p class="mb-0">Your appointment has been completed. If you have any follow-up questions, please contact the doctor's office.</p>
+                    </div>
+                {% elif appointment.status == 'cancelled' %}
+                    <div class="alert alert-danger">
+                        <h6><i class="fas fa-times-circle me-2"></i>Appointment Cancelled</h6>
+                        <p class="mb-0">This appointment has been cancelled. You can book a new appointment anytime.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-phone me-2"></i>
+                    Need Help?
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">
+                    <strong>Doctor's Office:</strong><br>
+                    {{ appointment.doctor.phone }}
+                </p>
+                <p class="mb-2">
+                    <strong>Emergency:</strong><br>
+                    911
+                </p>
+                <p class="mb-0">
+                    <strong>Patient Support:</strong><br>
+                    support@healthcare.com
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancellation Policy Modal -->
+{% if appointment.status not in 'completed,cancelled' %}
+<div class="modal fade" id="cancellationPolicyModal" tabindex="-1" aria-labelledby="cancellationPolicyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancellationPolicyModalLabel">
+                    <i class="fas fa-info-circle me-2"></i>Cancellation Policy
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Important Information:</h6>
+                    <ul class="mb-0">
+                        <li>Appointments can be cancelled up to 2 hours before the scheduled time</li>
+                        <li>Late cancellations may incur a fee</li>
+                        <li>No-shows may affect future booking privileges</li>
+                        <li>Emergency cancellations are always accepted</li>
+                    </ul>
+                </div>
+                <p>If you need to cancel this appointment, please click the "Cancel Appointment" button. You will receive a confirmation email once the cancellation is processed.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="{% url 'patient:cancel_appointment' appointment.id %}" class="btn btn-danger">
+                    <i class="fas fa-times me-2"></i>Proceed to Cancel
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show cancellation policy modal when cancel button is clicked
+        const cancelButton = document.querySelector('a[href*="cancel_appointment"]');
+        if (cancelButton) {
+            cancelButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                const modal = new bootstrap.Modal(document.getElementById('cancellationPolicyModal'));
+                modal.show();
+            });
+        }
+        
+        // Add print functionality
+        function printAppointment() {
+            window.print();
+        }
+        
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+P for print
+            if (e.ctrlKey && e.key === 'p') {
+                e.preventDefault();
+                printAppointment();
+            }
+            
+            // Escape to go back
+            if (e.key === 'Escape') {
+                window.location.href = "{% url 'patient:appointment_list' %}";
+            }
+        });
+    });
+</script>
+{% endblock %} 

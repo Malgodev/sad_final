@@ -1,0 +1,193 @@
+{% extends 'selftest/base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h2 class="mb-2">
+                        <i class="fas fa-history me-2"></i>
+                        Test History
+                    </h2>
+                    <p class="mb-0">View your previous health assessments and track your health journey</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Options -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label for="risk-filter" class="form-label">Filter by Risk Level</label>
+                            <select name="risk" id="risk-filter" class="form-select">
+                                <option value="">All Risk Levels</option>
+                                <option value="low" {% if risk_filter == 'low' %}selected{% endif %}>Low Risk</option>
+                                <option value="medium" {% if risk_filter == 'medium' %}selected{% endif %}>Medium Risk</option>
+                                <option value="high" {% if risk_filter == 'high' %}selected{% endif %}>High Risk</option>
+                                <option value="urgent" {% if risk_filter == 'urgent' %}selected{% endif %}>Urgent</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-filter me-1"></i>Apply Filter
+                            </button>
+                            <a href="{% url 'selftest:test_history' %}" class="btn btn-outline-secondary ms-2">
+                                <i class="fas fa-times me-1"></i>Clear
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test History -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-list me-2"></i>
+                        Your Health Tests
+                    </h4>
+                    <a href="{% url 'selftest:quick_test' %}" class="btn btn-success">
+                        <i class="fas fa-plus me-1"></i>New Test
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if page_obj %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Risk Level</th>
+                                    <th>Symptoms Count</th>
+                                    <th>Top Prediction</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for test in page_obj %}
+                                <tr>
+                                    <td>
+                                        <div>
+                                            <i class="fas fa-calendar me-2"></i>
+                                            <strong>{{ test.created_at|date:"M d, Y" }}</strong>
+                                        </div>
+                                        <small class="text-muted">{{ test.created_at|time:"g:i A" }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if test.risk_level == 'low' %}bg-success
+                                            {% elif test.risk_level == 'medium' %}bg-warning
+                                            {% elif test.risk_level == 'high' %}bg-danger
+                                            {% else %}bg-dark{% endif %}">
+                                            {% if test.risk_level == 'low' %}<i class="fas fa-shield-alt me-1"></i>
+                                            {% elif test.risk_level == 'medium' %}<i class="fas fa-exclamation-triangle me-1"></i>
+                                            {% elif test.risk_level == 'high' %}<i class="fas fa-exclamation-circle me-1"></i>
+                                            {% else %}<i class="fas fa-ambulance me-1"></i>{% endif %}
+                                            {{ test.get_risk_level_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">
+                                            {{ test.symptom_reports.count }} symptom{{ test.symptom_reports.count|pluralize }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if test.predicted_diseases %}
+                                            <div>
+                                                <strong>{{ test.predicted_diseases.0.name }}</strong>
+                                            </div>
+                                            <small class="text-muted">{{ test.predicted_diseases.0.confidence }}% confidence</small>
+                                        {% else %}
+                                            <span class="text-muted">No predictions</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'selftest:test_results' test.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye me-1"></i>View Details
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <nav aria-label="Test history pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if risk_filter %}&risk={{ risk_filter }}{% endif %}">
+                                    <i class="fas fa-chevron-left"></i> Previous
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if risk_filter %}&risk={{ risk_filter }}{% endif %}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if risk_filter %}&risk={{ risk_filter }}{% endif %}">
+                                    Next <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-clipboard-list fa-4x text-muted mb-4"></i>
+                        <h4 class="text-muted">No tests found</h4>
+                        {% if risk_filter %}
+                        <p class="text-muted">No tests match the selected risk level filter.</p>
+                        <a href="{% url 'selftest:test_history' %}" class="btn btn-outline-primary me-2">
+                            <i class="fas fa-times me-1"></i>Clear Filter
+                        </a>
+                        {% else %}
+                        <p class="text-muted">You haven't taken any health tests yet.</p>
+                        {% endif %}
+                        <a href="{% url 'selftest:quick_test' %}" class="btn btn-success">
+                            <i class="fas fa-play me-1"></i>Take Your First Test
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-submit filter form when selection changes
+    document.getElementById('risk-filter').addEventListener('change', function() {
+        this.form.submit();
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+
+# Django
+*.pyc
+*.pyo
+*.pyd
+db.sqlite3
+/media
+/staticfiles
+
+# Environment
+.env
+venv/
+env/
+*.env
+
+# VSCode
+.vscode/
+
+# Mac/Unix
+.DS_Store
+
+# Docker
+*.pid
+
+# Pytest
+.pytest_cache/

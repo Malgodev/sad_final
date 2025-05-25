@@ -1,0 +1,442 @@
+{% extends 'selftest/base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h2 class="mb-2">
+                        <i class="fas fa-bolt me-2"></i>
+                        Quick Health Assessment
+                    </h2>
+                    <p class="mb-0">Get instant health insights in under 2 minutes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Test Form -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-search me-2"></i>
+                        Select Your Symptoms
+                    </h4>
+                    <small class="text-muted">Search and select symptoms you're experiencing</small>
+                </div>
+                <div class="card-body">
+                    <!-- Selected Symptoms Display -->
+                    <div id="selected-symptoms-container" class="mb-4" style="display: none;">
+                        <h5 class="mb-3">
+                            <i class="fas fa-check-circle me-2 text-success"></i>
+                            Selected Symptoms (<span id="symptom-count">0</span>)
+                        </h5>
+                        <div id="selected-symptoms-list" class="d-flex flex-wrap gap-2 mb-3">
+                            <!-- Selected symptoms will appear here -->
+                        </div>
+                        <button type="button" id="clear-all-symptoms" class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-trash me-1"></i>Clear All
+                        </button>
+                    </div>
+
+                    <!-- Symptom Search -->
+                    <div class="mb-4">
+                        <label for="symptom-search" class="form-label">
+                            <i class="fas fa-search me-1"></i>
+                            Search Symptoms
+                        </label>
+                        <input type="text" 
+                               id="symptom-search" 
+                               class="form-control form-control-lg" 
+                               placeholder="Type to search symptoms (e.g., headache, fever, cough)..."
+                               autocomplete="off">
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Start typing to search through our database of 35+ symptoms
+                        </div>
+                    </div>
+
+                    <!-- Loading Indicator -->
+                    <div id="search-loading" class="text-center py-3" style="display: none;">
+                        <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                        <p class="mt-2 text-muted">Searching symptoms...</p>
+                    </div>
+
+                    <!-- Symptom Results -->
+                    <div id="symptom-results" class="row">
+                        <!-- Initial symptoms will be loaded here -->
+                        {% for symptom in symptoms %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card symptom-card h-100" data-symptom-id="{{ symptom.id }}">
+                                <div class="card-body">
+                                    <div class="form-check">
+                                        <input class="form-check-input symptom-checkbox" 
+                                               type="checkbox" 
+                                               id="symptom_{{ symptom.id }}"
+                                               data-symptom-name="{{ symptom.name }}"
+                                               data-symptom-description="{{ symptom.description }}"
+                                               data-symptom-category="{{ symptom.category }}">
+                                        <label class="form-check-label w-100" for="symptom_{{ symptom.id }}">
+                                            <strong>{{ symptom.name }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ symptom.description }}</small>
+                                        </label>
+                                    </div>
+                                    
+                                    <!-- Severity Rating (hidden initially) -->
+                                    <div class="severity-section mt-3" style="display: none;">
+                                        <label class="form-label small">Severity (1-4):</label>
+                                        <div class="severity-buttons">
+                                            {% for i in "1234" %}
+                                            <button type="button" 
+                                                    class="btn btn-outline-primary btn-sm severity-btn me-1 mb-1" 
+                                                    data-severity="{{ forloop.counter }}">
+                                                {{ forloop.counter }}
+                                            </button>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="severity-description mt-2">
+                                            <small class="text-muted">Select severity level</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- No Results Message -->
+                    <div id="no-results" class="text-center py-4" style="display: none;">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No symptoms found</h5>
+                        <p class="text-muted">Try different search terms or browse all symptoms</p>
+                    </div>
+
+                    <!-- Additional Notes -->
+                    <div class="mt-4">
+                        <label for="additional-notes" class="form-label">
+                            <i class="fas fa-comment me-1"></i>
+                            Additional Notes (Optional)
+                        </label>
+                        <textarea id="additional-notes" 
+                                  class="form-control" 
+                                  rows="3" 
+                                  placeholder="Describe any other symptoms or concerns..."></textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="text-center mt-4">
+                        <button type="button" id="analyze-symptoms" class="btn btn-success btn-lg" disabled>
+                            <i class="fas fa-brain me-2"></i>
+                            Analyze My Symptoms
+                        </button>
+                        <div class="form-text mt-2">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Select at least one symptom to continue
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('symptom-search');
+    const resultsContainer = document.getElementById('symptom-results');
+    const loadingIndicator = document.getElementById('search-loading');
+    const noResultsMessage = document.getElementById('no-results');
+    const selectedSymptomsContainer = document.getElementById('selected-symptoms-container');
+    const selectedSymptomsList = document.getElementById('selected-symptoms-list');
+    const symptomCount = document.getElementById('symptom-count');
+    const clearAllBtn = document.getElementById('clear-all-symptoms');
+    const analyzeBtn = document.getElementById('analyze-symptoms');
+    const additionalNotes = document.getElementById('additional-notes');
+    
+    let searchTimeout;
+    let selectedSymptoms = new Map(); // Store selected symptoms with their data
+    
+    // Severity descriptions
+    const severityDescriptions = {
+        1: 'Mild (barely noticeable, doesn\'t interfere with daily activities)',
+        2: 'Moderate (noticeable and somewhat bothersome)',
+        3: 'Severe (significantly affects daily activities)',
+        4: 'Very Severe (severely limits or prevents daily activities)'
+    };
+    
+    // Search functionality with debouncing
+    searchInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            searchSymptoms(query);
+        }, 300); // 300ms debounce
+    });
+    
+    function searchSymptoms(query) {
+        loadingIndicator.style.display = 'block';
+        resultsContainer.style.display = 'none';
+        noResultsMessage.style.display = 'none';
+        
+        fetch(`{% url 'selftest:quick_symptom_search_api' %}?q=${encodeURIComponent(query)}`, {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': csrftoken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            loadingIndicator.style.display = 'none';
+            
+            if (data.success && data.symptoms.length > 0) {
+                displaySymptoms(data.symptoms);
+                resultsContainer.style.display = 'block';
+            } else {
+                noResultsMessage.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Search error:', error);
+            loadingIndicator.style.display = 'none';
+            resultsContainer.style.display = 'block';
+        });
+    }
+    
+    function displaySymptoms(symptoms) {
+        resultsContainer.innerHTML = '';
+        
+        symptoms.forEach(symptom => {
+            const isSelected = selectedSymptoms.has(symptom.name);
+            const selectedData = selectedSymptoms.get(symptom.name);
+            
+            const symptomCard = document.createElement('div');
+            symptomCard.className = 'col-md-6 col-lg-4 mb-3';
+            symptomCard.innerHTML = `
+                <div class="card symptom-card h-100 ${isSelected ? 'selected-symptom' : ''}" data-symptom-id="${symptom.id}">
+                    <div class="card-body">
+                        <div class="form-check">
+                            <input class="form-check-input symptom-checkbox" 
+                                   type="checkbox" 
+                                   id="symptom_${symptom.id}"
+                                   data-symptom-name="${symptom.name}"
+                                   data-symptom-description="${symptom.description}"
+                                   data-symptom-category="${symptom.category}"
+                                   ${isSelected ? 'checked' : ''}>
+                            <label class="form-check-label w-100" for="symptom_${symptom.id}">
+                                <strong>${symptom.name}</strong>
+                                <br>
+                                <small class="text-muted">${symptom.description}</small>
+                            </label>
+                        </div>
+                        
+                        <div class="severity-section mt-3" style="display: ${isSelected ? 'block' : 'none'};">
+                            <label class="form-label small">Severity (1-4):</label>
+                            <div class="severity-buttons">
+                                ${Array.from({length: 4}, (_, i) => i + 1).map(num => `
+                                    <button type="button" 
+                                            class="btn btn-outline-primary btn-sm severity-btn me-1 mb-1 ${selectedData && selectedData.severity === num ? 'active' : ''}" 
+                                            data-severity="${num}">
+                                        ${num}
+                                    </button>
+                                `).join('')}
+                            </div>
+                            <div class="severity-description mt-2">
+                                <small class="text-muted">${selectedData ? severityDescriptions[selectedData.severity] : 'Select severity level'}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            resultsContainer.appendChild(symptomCard);
+        });
+        
+        // Re-attach event listeners
+        attachEventListeners();
+    }
+    
+    function attachEventListeners() {
+        // Symptom checkbox listeners
+        document.querySelectorAll('.symptom-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', handleSymptomSelection);
+        });
+        
+        // Severity button listeners
+        document.querySelectorAll('.severity-btn').forEach(btn => {
+            btn.addEventListener('click', handleSeveritySelection);
+        });
+    }
+    
+    function handleSymptomSelection(event) {
+        const checkbox = event.target;
+        const card = checkbox.closest('.symptom-card');
+        const severitySection = card.querySelector('.severity-section');
+        const symptomName = checkbox.dataset.symptomName;
+        
+        if (checkbox.checked) {
+            // Add symptom
+            card.classList.add('selected-symptom');
+            severitySection.style.display = 'block';
+            
+            // Add to selected symptoms with default severity
+            selectedSymptoms.set(symptomName, {
+                name: symptomName,
+                description: checkbox.dataset.symptomDescription,
+                category: checkbox.dataset.symptomCategory,
+                severity: 2 // Default severity (moderate)
+            });
+            
+            // Auto-select severity 2 as default
+            const severityBtn = severitySection.querySelector('[data-severity="2"]');
+            if (severityBtn) {
+                severityBtn.click();
+            }
+        } else {
+            // Remove symptom
+            card.classList.remove('selected-symptom');
+            severitySection.style.display = 'none';
+            selectedSymptoms.delete(symptomName);
+        }
+        
+        updateSelectedSymptomsDisplay();
+        updateAnalyzeButton();
+    }
+    
+    function handleSeveritySelection(event) {
+        const btn = event.target;
+        const severity = parseInt(btn.dataset.severity);
+        const card = btn.closest('.symptom-card');
+        const checkbox = card.querySelector('.symptom-checkbox');
+        const symptomName = checkbox.dataset.symptomName;
+        const descriptionElement = card.querySelector('.severity-description small');
+        
+        // Update button states
+        card.querySelectorAll('.severity-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Update description
+        descriptionElement.textContent = severityDescriptions[severity];
+        
+        // Update selected symptoms data
+        if (selectedSymptoms.has(symptomName)) {
+            const symptomData = selectedSymptoms.get(symptomName);
+            symptomData.severity = severity;
+            selectedSymptoms.set(symptomName, symptomData);
+            updateSelectedSymptomsDisplay();
+        }
+    }
+    
+    function updateSelectedSymptomsDisplay() {
+        if (selectedSymptoms.size === 0) {
+            selectedSymptomsContainer.style.display = 'none';
+            return;
+        }
+        
+        selectedSymptomsContainer.style.display = 'block';
+        symptomCount.textContent = selectedSymptoms.size;
+        
+                    selectedSymptomsList.innerHTML = '';
+        selectedSymptoms.forEach((symptomData, symptomName) => {
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-primary me-2 mb-2 p-2';
+            badge.innerHTML = `
+                ${symptomName} (${symptomData.severity}/4)
+                <button type="button" class="btn-close btn-close-white ms-2" data-symptom="${symptomName}"></button>
+            `;
+            
+            // Add remove functionality
+            badge.querySelector('.btn-close').addEventListener('click', function() {
+                removeSymptom(symptomName);
+            });
+            
+            selectedSymptomsList.appendChild(badge);
+        });
+    }
+    
+    function removeSymptom(symptomName) {
+        selectedSymptoms.delete(symptomName);
+        
+        // Uncheck the checkbox if visible
+        const checkbox = document.querySelector(`[data-symptom-name="${symptomName}"]`);
+        if (checkbox) {
+            checkbox.checked = false;
+            const card = checkbox.closest('.symptom-card');
+            card.classList.remove('selected-symptom');
+            card.querySelector('.severity-section').style.display = 'none';
+        }
+        
+        updateSelectedSymptomsDisplay();
+        updateAnalyzeButton();
+    }
+    
+    function updateAnalyzeButton() {
+        analyzeBtn.disabled = selectedSymptoms.size === 0;
+    }
+    
+    // Clear all symptoms
+    clearAllBtn.addEventListener('click', function() {
+        selectedSymptoms.clear();
+        document.querySelectorAll('.symptom-checkbox').forEach(checkbox => {
+            checkbox.checked = false;
+            const card = checkbox.closest('.symptom-card');
+            card.classList.remove('selected-symptom');
+            card.querySelector('.severity-section').style.display = 'none';
+        });
+        updateSelectedSymptomsDisplay();
+        updateAnalyzeButton();
+    });
+    
+    // Analyze symptoms
+    analyzeBtn.addEventListener('click', function() {
+        if (selectedSymptoms.size === 0) {
+            alert('Please select at least one symptom.');
+            return;
+        }
+        
+        const originalText = analyzeBtn.innerHTML;
+        showLoading(analyzeBtn);
+        
+        // Prepare data for submission
+        const symptomsArray = Array.from(selectedSymptoms.values());
+        const formData = new FormData();
+        formData.append('selected_symptoms', JSON.stringify(symptomsArray));
+        formData.append('additional_notes', additionalNotes.value);
+        formData.append('csrfmiddlewaretoken', csrftoken);
+        
+        fetch('{% url "selftest:quick_test" %}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading(analyzeBtn, originalText);
+            
+            if (data.success) {
+                window.location.href = data.redirect_url;
+            } else {
+                alert('Error: ' + (data.error || 'Something went wrong. Please try again.'));
+            }
+        })
+        .catch(error => {
+            hideLoading(analyzeBtn, originalText);
+            console.error('Analysis error:', error);
+            alert('Error analyzing symptoms. Please try again.');
+        });
+    });
+    
+    // Initial setup
+    attachEventListeners();
+    updateAnalyzeButton();
+});
+</script>
+{% endblock %} 

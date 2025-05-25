@@ -1,0 +1,249 @@
+{
+  "symptoms": [
+    {
+      "id": 1,
+      "name": "Fever",
+      "description": "Elevated body temperature above normal (38°C/100.4°F)",
+      "category": "General",
+      "keywords": ["temperature", "hot", "chills", "sweating"]
+    },
+    {
+      "id": 2,
+      "name": "Headache",
+      "description": "Pain in the head or upper neck area",
+      "category": "Neurological",
+      "keywords": ["head pain", "migraine", "tension", "pressure"]
+    },
+    {
+      "id": 3,
+      "name": "Cough",
+      "description": "Forceful expulsion of air from the lungs",
+      "category": "Respiratory",
+      "keywords": ["dry cough", "wet cough", "persistent cough"]
+    },
+    {
+      "id": 4,
+      "name": "Sore Throat",
+      "description": "Pain or irritation in the throat",
+      "category": "Respiratory",
+      "keywords": ["throat pain", "scratchy throat", "swallowing pain"]
+    },
+    {
+      "id": 5,
+      "name": "Fatigue",
+      "description": "Extreme tiredness or lack of energy",
+      "category": "General",
+      "keywords": ["tired", "exhausted", "weakness", "lethargy"]
+    },
+    {
+      "id": 6,
+      "name": "Nausea",
+      "description": "Feeling of sickness with urge to vomit",
+      "category": "Gastrointestinal",
+      "keywords": ["sick feeling", "queasy", "upset stomach"]
+    },
+    {
+      "id": 7,
+      "name": "Vomiting",
+      "description": "Forceful expulsion of stomach contents",
+      "category": "Gastrointestinal",
+      "keywords": ["throwing up", "puking", "retching"]
+    },
+    {
+      "id": 8,
+      "name": "Diarrhea",
+      "description": "Loose or watery bowel movements",
+      "category": "Gastrointestinal",
+      "keywords": ["loose stool", "watery stool", "frequent bowel movements"]
+    },
+    {
+      "id": 9,
+      "name": "Stomach Pain",
+      "description": "Pain or discomfort in the abdominal area",
+      "category": "Gastrointestinal",
+      "keywords": ["abdominal pain", "belly ache", "cramps"]
+    },
+    {
+      "id": 10,
+      "name": "Muscle Aches",
+      "description": "Pain or soreness in muscles",
+      "category": "Musculoskeletal",
+      "keywords": ["muscle pain", "body aches", "soreness"]
+    },
+    {
+      "id": 11,
+      "name": "Joint Pain",
+      "description": "Pain in joints such as knees, elbows, or shoulders",
+      "category": "Musculoskeletal",
+      "keywords": ["arthritis", "joint ache", "stiffness"]
+    },
+    {
+      "id": 12,
+      "name": "Difficulty Breathing",
+      "description": "Shortness of breath or trouble breathing",
+      "category": "Respiratory",
+      "keywords": ["shortness of breath", "breathless", "dyspnea"]
+    },
+    {
+      "id": 13,
+      "name": "Chest Pain",
+      "description": "Pain or discomfort in the chest area",
+      "category": "Cardiovascular",
+      "keywords": ["chest discomfort", "heart pain", "pressure"]
+    },
+    {
+      "id": 14,
+      "name": "Dizziness",
+      "description": "Feeling lightheaded or unsteady",
+      "category": "Neurological",
+      "keywords": ["lightheaded", "vertigo", "spinning sensation"]
+    },
+    {
+      "id": 15,
+      "name": "Runny Nose",
+      "description": "Nasal discharge or congestion",
+      "category": "Respiratory",
+      "keywords": ["nasal congestion", "stuffy nose", "rhinitis"]
+    },
+    {
+      "id": 16,
+      "name": "Sneezing",
+      "description": "Involuntary expulsion of air from nose and mouth",
+      "category": "Respiratory",
+      "keywords": ["allergic reaction", "nasal irritation"]
+    },
+    {
+      "id": 17,
+      "name": "Skin Rash",
+      "description": "Red, irritated, or inflamed skin",
+      "category": "Dermatological",
+      "keywords": ["redness", "irritation", "hives", "eczema"]
+    },
+    {
+      "id": 18,
+      "name": "Itching",
+      "description": "Uncomfortable sensation causing desire to scratch",
+      "category": "Dermatological",
+      "keywords": ["itchy skin", "pruritus", "scratching"]
+    },
+    {
+      "id": 19,
+      "name": "Swelling",
+      "description": "Enlargement of body parts due to fluid retention",
+      "category": "General",
+      "keywords": ["edema", "puffiness", "inflammation"]
+    },
+    {
+      "id": 20,
+      "name": "Loss of Appetite",
+      "description": "Reduced desire to eat",
+      "category": "General",
+      "keywords": ["not hungry", "decreased appetite", "anorexia"]
+    },
+    {
+      "id": 21,
+      "name": "Weight Loss",
+      "description": "Unintentional reduction in body weight",
+      "category": "General",
+      "keywords": ["losing weight", "weight decrease"]
+    },
+    {
+      "id": 22,
+      "name": "Insomnia",
+      "description": "Difficulty falling asleep or staying asleep",
+      "category": "Sleep",
+      "keywords": ["sleeplessness", "trouble sleeping", "sleep disorder"]
+    },
+    {
+      "id": 23,
+      "name": "Excessive Sleepiness",
+      "description": "Feeling very sleepy during normal waking hours",
+      "category": "Sleep",
+      "keywords": ["hypersomnia", "daytime sleepiness", "drowsiness"]
+    },
+    {
+      "id": 24,
+      "name": "Anxiety",
+      "description": "Feelings of worry, nervousness, or unease",
+      "category": "Mental Health",
+      "keywords": ["worry", "nervousness", "panic", "stress"]
+    },
+    {
+      "id": 25,
+      "name": "Depression",
+      "description": "Persistent feelings of sadness or loss of interest",
+      "category": "Mental Health",
+      "keywords": ["sadness", "hopelessness", "low mood"]
+    },
+    {
+      "id": 26,
+      "name": "Memory Problems",
+      "description": "Difficulty remembering or concentrating",
+      "category": "Neurological",
+      "keywords": ["forgetfulness", "concentration issues", "brain fog"]
+    },
+    {
+      "id": 27,
+      "name": "Blurred Vision",
+      "description": "Unclear or fuzzy vision",
+      "category": "Ophthalmological",
+      "keywords": ["vision problems", "eye strain", "visual disturbance"]
+    },
+    {
+      "id": 28,
+      "name": "Ear Pain",
+      "description": "Pain or discomfort in the ear",
+      "category": "ENT",
+      "keywords": ["earache", "ear infection", "hearing pain"]
+    },
+    {
+      "id": 29,
+      "name": "Hearing Loss",
+      "description": "Reduced ability to hear sounds",
+      "category": "ENT",
+      "keywords": ["deafness", "hearing impairment", "muffled hearing"]
+    },
+    {
+      "id": 30,
+      "name": "Frequent Urination",
+      "description": "Need to urinate more often than usual",
+      "category": "Urological",
+      "keywords": ["urinary frequency", "bladder issues"]
+    },
+    {
+      "id": 31,
+      "name": "Painful Urination",
+      "description": "Pain or burning sensation when urinating",
+      "category": "Urological",
+      "keywords": ["dysuria", "burning urination", "UTI symptoms"]
+    },
+    {
+      "id": 32,
+      "name": "Back Pain",
+      "description": "Pain in the lower, middle, or upper back",
+      "category": "Musculoskeletal",
+      "keywords": ["spine pain", "lumbar pain", "backache"]
+    },
+    {
+      "id": 33,
+      "name": "Neck Pain",
+      "description": "Pain or stiffness in the neck area",
+      "category": "Musculoskeletal",
+      "keywords": ["neck stiffness", "cervical pain", "neck ache"]
+    },
+    {
+      "id": 34,
+      "name": "Constipation",
+      "description": "Difficulty passing stool or infrequent bowel movements",
+      "category": "Gastrointestinal",
+      "keywords": ["hard stool", "infrequent bowel movements"]
+    },
+    {
+      "id": 35,
+      "name": "Heartburn",
+      "description": "Burning sensation in chest due to acid reflux",
+      "category": "Gastrointestinal",
+      "keywords": ["acid reflux", "GERD", "chest burning"]
+    }
+  ]
+} 

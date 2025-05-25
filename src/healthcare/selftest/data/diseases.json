@@ -1,0 +1,304 @@
+{
+  "diseases": [
+    {
+      "id": 1,
+      "name": "Common Cold",
+      "description": "Viral infection of the upper respiratory tract",
+      "symptoms": ["runny nose", "sneezing", "sore throat", "cough", "fatigue", "headache"],
+      "risk_level": "low",
+      "treatment": "Rest, fluids, over-the-counter medications for symptom relief",
+      "specialist": "General Practitioner",
+      "urgency": "Self-care, see doctor if symptoms worsen or persist beyond 10 days"
+    },
+    {
+      "id": 2,
+      "name": "Influenza (Flu)",
+      "description": "Viral infection affecting the respiratory system",
+      "symptoms": ["fever", "muscle aches", "fatigue", "headache", "cough", "sore throat"],
+      "risk_level": "medium",
+      "treatment": "Rest, fluids, antiviral medications if started early",
+      "specialist": "General Practitioner",
+      "urgency": "See doctor within 48 hours for antiviral treatment"
+    },
+    {
+      "id": 3,
+      "name": "Gastroenteritis",
+      "description": "Inflammation of stomach and intestines",
+      "symptoms": ["nausea", "vomiting", "diarrhea", "stomach pain", "fever", "fatigue"],
+      "risk_level": "medium",
+      "treatment": "Hydration, rest, bland diet, probiotics",
+      "specialist": "General Practitioner",
+      "urgency": "See doctor if severe dehydration or symptoms persist beyond 3 days"
+    },
+    {
+      "id": 4,
+      "name": "Migraine",
+      "description": "Severe headache disorder with neurological symptoms",
+      "symptoms": ["headache", "nausea", "blurred vision", "dizziness", "fatigue"],
+      "risk_level": "medium",
+      "treatment": "Pain medications, rest in dark room, trigger avoidance",
+      "specialist": "Neurologist",
+      "urgency": "See doctor for severe or frequent migraines"
+    },
+    {
+      "id": 5,
+      "name": "Allergic Reaction",
+      "description": "Immune system response to allergens",
+      "symptoms": ["skin rash", "itching", "swelling", "sneezing", "runny nose"],
+      "risk_level": "low",
+      "treatment": "Antihistamines, avoid allergens, topical treatments",
+      "specialist": "Allergist",
+      "urgency": "Seek immediate care for severe reactions (difficulty breathing)"
+    },
+    {
+      "id": 6,
+      "name": "Anxiety Disorder",
+      "description": "Mental health condition characterized by excessive worry",
+      "symptoms": ["anxiety", "fatigue", "insomnia", "muscle aches", "headache"],
+      "risk_level": "medium",
+      "treatment": "Therapy, relaxation techniques, medication if needed",
+      "specialist": "Psychiatrist or Psychologist",
+      "urgency": "See mental health professional for persistent symptoms"
+    },
+    {
+      "id": 7,
+      "name": "Depression",
+      "description": "Mental health disorder affecting mood and daily functioning",
+      "symptoms": ["depression", "fatigue", "insomnia", "loss of appetite", "memory problems"],
+      "risk_level": "medium",
+      "treatment": "Therapy, medication, lifestyle changes",
+      "specialist": "Psychiatrist or Psychologist",
+      "urgency": "Seek immediate help for suicidal thoughts"
+    },
+    {
+      "id": 8,
+      "name": "Hypertension",
+      "description": "High blood pressure condition",
+      "symptoms": ["headache", "dizziness", "chest pain", "fatigue"],
+      "risk_level": "high",
+      "treatment": "Lifestyle changes, blood pressure medications",
+      "specialist": "Cardiologist",
+      "urgency": "Regular monitoring required, emergency care for severe symptoms"
+    },
+    {
+      "id": 9,
+      "name": "Type 2 Diabetes",
+      "description": "Metabolic disorder affecting blood sugar regulation",
+      "symptoms": ["frequent urination", "fatigue", "blurred vision", "weight loss"],
+      "risk_level": "high",
+      "treatment": "Diet control, exercise, blood sugar monitoring, medication",
+      "specialist": "Endocrinologist",
+      "urgency": "Regular monitoring required, emergency care for severe symptoms"
+    },
+    {
+      "id": 10,
+      "name": "Urinary Tract Infection",
+      "description": "Bacterial infection of the urinary system",
+      "symptoms": ["painful urination", "frequent urination", "fever", "stomach pain"],
+      "risk_level": "medium",
+      "treatment": "Antibiotics, increased fluid intake",
+      "specialist": "Urologist",
+      "urgency": "See doctor promptly to prevent kidney infection"
+    },
+    {
+      "id": 11,
+      "name": "Pneumonia",
+      "description": "Infection causing inflammation in lung air sacs",
+      "symptoms": ["cough", "fever", "difficulty breathing", "chest pain", "fatigue"],
+      "risk_level": "high",
+      "treatment": "Antibiotics, rest, oxygen therapy if needed",
+      "specialist": "Pulmonologist",
+      "urgency": "Seek immediate medical attention"
+    },
+    {
+      "id": 12,
+      "name": "Asthma",
+      "description": "Chronic respiratory condition causing airway inflammation",
+      "symptoms": ["difficulty breathing", "cough", "chest pain", "fatigue"],
+      "risk_level": "medium",
+      "treatment": "Inhalers, avoid triggers, medication management",
+      "specialist": "Pulmonologist",
+      "urgency": "Emergency care for severe breathing difficulty"
+    },
+    {
+      "id": 13,
+      "name": "Arthritis",
+      "description": "Joint inflammation causing pain and stiffness",
+      "symptoms": ["joint pain", "swelling", "muscle aches", "fatigue"],
+      "risk_level": "medium",
+      "treatment": "Anti-inflammatory medications, physical therapy, exercise",
+      "specialist": "Rheumatologist",
+      "urgency": "See doctor for persistent joint pain"
+    },
+    {
+      "id": 14,
+      "name": "Fibromyalgia",
+      "description": "Chronic pain disorder affecting muscles and soft tissues",
+      "symptoms": ["muscle aches", "fatigue", "insomnia", "memory problems", "headache"],
+      "risk_level": "medium",
+      "treatment": "Pain management, exercise, stress reduction, medication",
+      "specialist": "Rheumatologist",
+      "urgency": "See doctor for chronic widespread pain"
+    },
+    {
+      "id": 15,
+      "name": "Sinusitis",
+      "description": "Inflammation of sinus cavities",
+      "symptoms": ["headache", "runny nose", "sore throat", "fatigue", "ear pain"],
+      "risk_level": "low",
+      "treatment": "Decongestants, nasal irrigation, antibiotics if bacterial",
+      "specialist": "ENT Specialist",
+      "urgency": "See doctor if symptoms persist beyond 10 days"
+    },
+    {
+      "id": 16,
+      "name": "Bronchitis",
+      "description": "Inflammation of bronchial tubes",
+      "symptoms": ["cough", "fatigue", "chest pain", "difficulty breathing"],
+      "risk_level": "medium",
+      "treatment": "Rest, fluids, cough suppressants, bronchodilators",
+      "specialist": "Pulmonologist",
+      "urgency": "See doctor for persistent cough or breathing difficulty"
+    },
+    {
+      "id": 17,
+      "name": "Eczema",
+      "description": "Chronic skin condition causing inflammation",
+      "symptoms": ["skin rash", "itching", "swelling"],
+      "risk_level": "low",
+      "treatment": "Moisturizers, topical steroids, avoid triggers",
+      "specialist": "Dermatologist",
+      "urgency": "See doctor for severe or infected eczema"
+    },
+    {
+      "id": 18,
+      "name": "Psoriasis",
+      "description": "Autoimmune skin condition causing rapid cell turnover",
+      "symptoms": ["skin rash", "itching", "joint pain"],
+      "risk_level": "medium",
+      "treatment": "Topical treatments, light therapy, systemic medications",
+      "specialist": "Dermatologist",
+      "urgency": "See doctor for proper diagnosis and treatment"
+    },
+    {
+      "id": 19,
+      "name": "Irritable Bowel Syndrome",
+      "description": "Functional gastrointestinal disorder",
+      "symptoms": ["stomach pain", "diarrhea", "constipation", "nausea"],
+      "risk_level": "medium",
+      "treatment": "Dietary changes, stress management, medications",
+      "specialist": "Gastroenterologist",
+      "urgency": "See doctor for persistent digestive symptoms"
+    },
+    {
+      "id": 20,
+      "name": "Acid Reflux (GERD)",
+      "description": "Stomach acid flowing back into esophagus",
+      "symptoms": ["heartburn", "chest pain", "sore throat", "cough"],
+      "risk_level": "medium",
+      "treatment": "Dietary changes, antacids, proton pump inhibitors",
+      "specialist": "Gastroenterologist",
+      "urgency": "See doctor for frequent or severe symptoms"
+    },
+    {
+      "id": 21,
+      "name": "Sleep Apnea",
+      "description": "Sleep disorder causing breathing interruptions",
+      "symptoms": ["excessive sleepiness", "fatigue", "headache", "memory problems"],
+      "risk_level": "medium",
+      "treatment": "CPAP therapy, lifestyle changes, surgery if needed",
+      "specialist": "Sleep Medicine Specialist",
+      "urgency": "See doctor for evaluation and sleep study"
+    },
+    {
+      "id": 22,
+      "name": "Chronic Fatigue Syndrome",
+      "description": "Complex disorder characterized by extreme fatigue",
+      "symptoms": ["fatigue", "muscle aches", "memory problems", "insomnia", "headache"],
+      "risk_level": "medium",
+      "treatment": "Symptom management, graded exercise, cognitive therapy",
+      "specialist": "Internal Medicine",
+      "urgency": "See doctor for persistent unexplained fatigue"
+    },
+    {
+      "id": 23,
+      "name": "Thyroid Disorders",
+      "description": "Conditions affecting thyroid hormone production",
+      "symptoms": ["fatigue", "weight loss", "anxiety", "insomnia", "muscle aches"],
+      "risk_level": "medium",
+      "treatment": "Hormone replacement therapy, medication adjustment",
+      "specialist": "Endocrinologist",
+      "urgency": "See doctor for thyroid function testing"
+    },
+    {
+      "id": 24,
+      "name": "Kidney Stones",
+      "description": "Hard deposits formed in kidneys",
+      "symptoms": ["back pain", "painful urination", "nausea", "vomiting"],
+      "risk_level": "high",
+      "treatment": "Pain management, increased fluids, surgery if needed",
+      "specialist": "Urologist",
+      "urgency": "Seek immediate care for severe pain"
+    },
+    {
+      "id": 25,
+      "name": "Gallstones",
+      "description": "Hard deposits in gallbladder",
+      "symptoms": ["stomach pain", "nausea", "vomiting", "back pain"],
+      "risk_level": "medium",
+      "treatment": "Dietary changes, surgery if symptomatic",
+      "specialist": "Gastroenterologist",
+      "urgency": "See doctor for severe abdominal pain"
+    },
+    {
+      "id": 26,
+      "name": "Anemia",
+      "description": "Condition with insufficient healthy red blood cells",
+      "symptoms": ["fatigue", "dizziness", "headache", "difficulty breathing"],
+      "risk_level": "medium",
+      "treatment": "Iron supplements, dietary changes, treat underlying cause",
+      "specialist": "Hematologist",
+      "urgency": "See doctor for blood testing and evaluation"
+    },
+    {
+      "id": 27,
+      "name": "Osteoporosis",
+      "description": "Bone density loss increasing fracture risk",
+      "symptoms": ["back pain", "joint pain", "muscle aches"],
+      "risk_level": "medium",
+      "treatment": "Calcium, vitamin D, weight-bearing exercise, medications",
+      "specialist": "Endocrinologist",
+      "urgency": "See doctor for bone density screening"
+    },
+    {
+      "id": 28,
+      "name": "Vitamin D Deficiency",
+      "description": "Insufficient vitamin D levels",
+      "symptoms": ["fatigue", "muscle aches", "joint pain", "depression"],
+      "risk_level": "low",
+      "treatment": "Vitamin D supplements, sun exposure, dietary changes",
+      "specialist": "General Practitioner",
+      "urgency": "See doctor for blood testing"
+    },
+    {
+      "id": 29,
+      "name": "Chronic Kidney Disease",
+      "description": "Progressive loss of kidney function",
+      "symptoms": ["fatigue", "swelling", "frequent urination", "nausea"],
+      "risk_level": "high",
+      "treatment": "Blood pressure control, dietary changes, dialysis if advanced",
+      "specialist": "Nephrologist",
+      "urgency": "Regular monitoring required"
+    },
+    {
+      "id": 30,
+      "name": "Heart Disease",
+      "description": "Various conditions affecting heart function",
+      "symptoms": ["chest pain", "difficulty breathing", "fatigue", "dizziness"],
+      "risk_level": "urgent",
+      "treatment": "Lifestyle changes, medications, procedures as needed",
+      "specialist": "Cardiologist",
+      "urgency": "Seek immediate care for chest pain or breathing difficulty"
+    }
+  ]
+} 

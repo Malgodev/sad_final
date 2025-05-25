@@ -1,0 +1,229 @@
+{% extends 'doctor/base.html' %}
+
+{% block title %}Dashboard - Doctor Portal{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Welcome Section -->
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-tachometer-alt me-2"></i>
+                    Welcome, Dr. {{ doctor.user.first_name }} {{ doctor.user.last_name }}!
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <p class="mb-2"><strong>Specialization:</strong> {{ doctor.specialization }}</p>
+                        <p class="mb-2"><strong>License Number:</strong> {{ doctor.license_number }}</p>
+                        <p class="mb-0"><strong>Experience:</strong> {{ doctor.experience_years }} years</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="{% url 'doctor:create_appointment_slots' %}" class="btn btn-doctor">
+                            <i class="fas fa-plus me-2"></i>Create Slots
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Statistics Cards -->
+    <div class="col-md-3 mb-4">
+        <div class="stats-card">
+            <div class="stats-number">{{ total_slots }}</div>
+            <div class="stats-label">Total Slots</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="stats-card">
+            <div class="stats-number">{{ available_slots }}</div>
+            <div class="stats-label">Available</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="stats-card">
+            <div class="stats-number">{{ booked_slots }}</div>
+            <div class="stats-label">Booked</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="stats-card">
+            <div class="stats-number">{{ today_slots.count }}</div>
+            <div class="stats-label">Today's Slots</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Today's Slots -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-day me-2"></i>Today's Slots
+                </h5>
+                <a href="{% url 'doctor:appointment_calendar' %}" class="btn btn-sm btn-outline-light">
+                    View Calendar
+                </a>
+            </div>
+            <div class="card-body">
+                {% if today_slots %}
+                    {% for slot in today_slots %}
+                        <div class="appointment-card card mb-3" data-slot-url="{% url 'doctor:slot_detail' slot.id %}">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ slot.get_slot_type_display }}</h6>
+                                        <p class="mb-1 text-muted">
+                                            <i class="fas fa-clock me-1"></i>
+                                            {{ slot.start_time|time:"H:i" }} - {{ slot.end_time|time:"H:i" }}
+                                        </p>
+                                        {% if slot.appointment.patient %}
+                                            <p class="mb-0 small">
+                                                <i class="fas fa-user me-1"></i>
+                                                {{ slot.appointment.patient.user.get_full_name }}
+                                            </p>
+                                        {% else %}
+                                            <p class="mb-0 small text-success">
+                                                <i class="fas fa-check-circle me-1"></i>
+                                                Available for booking
+                                            </p>
+                                        {% endif %}
+                                    </div>
+                                    {% if slot.appointment.patient %}
+                                        <span class="status-badge status-{{ slot.appointment.status }}">
+                                            {{ slot.appointment.get_status_display }}
+                                        </span>
+                                    {% else %}
+                                        <span class="status-badge" style="background: #e8f5e8; color: #2e7d32;">
+                                            Available
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No slots created for today</p>
+                        <a href="{% url 'doctor:create_appointment_slots' %}?date={{ today|date:'Y-m-d' }}" class="btn btn-doctor">
+                            Create Slots
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Booked Slots -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>Upcoming Appointments
+                </h5>
+                <a href="{% url 'doctor:appointment_list' %}" class="btn btn-sm btn-outline-light">
+                    View All
+                </a>
+            </div>
+            <div class="card-body">
+                {% if upcoming_slots %}
+                    {% for slot in upcoming_slots %}
+                        <div class="appointment-card card mb-3" data-slot-url="{% url 'doctor:slot_detail' slot.id %}">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ slot.appointment.patient.user.get_full_name }}</h6>
+                                        <p class="mb-1 text-muted">
+                                            <i class="fas fa-calendar me-1"></i>
+                                            {{ slot.date|date:"M d, Y" }} {{ slot.start_time|time:"H:i" }}
+                                        </p>
+                                        <p class="mb-0 small">{{ slot.get_slot_type_display }}</p>
+                                    </div>
+                                    <span class="status-badge status-{{ slot.appointment.status }}">
+                                        {{ slot.appointment.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No upcoming appointments</p>
+                        <a href="{% url 'doctor:create_appointment_slots' %}" class="btn btn-doctor">
+                            Create Slots
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'doctor:create_appointment_slots' %}" class="btn btn-doctor w-100">
+                            <i class="fas fa-plus-circle me-2"></i>
+                            Create Slots
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'doctor:appointment_calendar' %}" class="btn btn-outline-doctor w-100">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            View Calendar
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'doctor:appointment_list' %}" class="btn btn-outline-doctor w-100">
+                            <i class="fas fa-list me-2"></i>
+                            All Appointments
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'doctor:profile' %}" class="btn btn-outline-doctor w-100">
+                            <i class="fas fa-user-edit me-2"></i>
+                            Edit Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Handle slot card clicks
+    document.addEventListener('DOMContentLoaded', function() {
+        const slotCards = document.querySelectorAll('.appointment-card[data-slot-url]');
+        slotCards.forEach(function(card) {
+            card.addEventListener('click', function() {
+                window.location.href = this.getAttribute('data-slot-url');
+            });
+        });
+    });
+    
+    // Auto-refresh dashboard every 5 minutes
+    setTimeout(function() {
+        location.reload();
+    }, 300000);
+</script>
+{% endblock %} 

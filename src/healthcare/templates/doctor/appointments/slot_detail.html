@@ -1,0 +1,307 @@
+{% extends 'doctor/base.html' %}
+
+{% block title %}Slot Details - Doctor Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .slot-info-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .slot-status {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: bold;
+        display: inline-block;
+    }
+    
+    .slot-status.available {
+        background: #e8f5e8;
+        color: #2e7d32;
+    }
+    
+    .slot-status.booked {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+    
+    .slot-status.completed {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+    
+    .slot-status.cancelled {
+        background: #ffebee;
+        color: #c62828;
+    }
+    
+    .patient-info {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 15px 0;
+    }
+    
+    .time-display {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--doctor-primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <!-- Slot Information -->
+        <div class="slot-info-card">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <h4>
+                    <i class="fas fa-clock me-2"></i>
+                    {{ slot.get_slot_type_display }}
+                </h4>
+                {% if appointment %}
+                    {% if appointment.patient %}
+                        <span class="slot-status booked">
+                            <i class="fas fa-user me-1"></i>Booked
+                        </span>
+                    {% else %}
+                        <span class="slot-status available">
+                            <i class="fas fa-check-circle me-1"></i>Available
+                        </span>
+                    {% endif %}
+                {% else %}
+                    <span class="slot-status available">
+                        <i class="fas fa-check-circle me-1"></i>Available
+                    </span>
+                {% endif %}
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h6><i class="fas fa-calendar me-1"></i>Date</h6>
+                    <p class="mb-3">{{ slot.date|date:"l, F d, Y" }}</p>
+                    
+                    <h6><i class="fas fa-clock me-1"></i>Time</h6>
+                    <p class="time-display">{{ slot.start_time|time:"g:i A" }} - {{ slot.end_time|time:"g:i A" }}</p>
+                    <small class="text-muted">Duration: 1.5 hours</small>
+                </div>
+                <div class="col-md-6">
+                    <h6><i class="fas fa-user-md me-1"></i>Doctor</h6>
+                    <p class="mb-3">Dr. {{ doctor.user.get_full_name }}</p>
+                    
+                    <h6><i class="fas fa-stethoscope me-1"></i>Specialization</h6>
+                    <p class="mb-3">{{ doctor.specialization }}</p>
+                    
+                    <h6><i class="fas fa-calendar-plus me-1"></i>Created</h6>
+                    <p class="mb-0">{{ slot.created_at|date:"M d, Y g:i A" }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Patient Information (if booked) -->
+        {% if appointment and appointment.patient %}
+            <div class="slot-info-card">
+                <h5><i class="fas fa-user me-2"></i>Patient Information</h5>
+                
+                <div class="patient-info">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-user me-1"></i>Name</h6>
+                            <p>{{ appointment.patient.user.get_full_name }}</p>
+                            
+                            <h6><i class="fas fa-envelope me-1"></i>Email</h6>
+                            <p>{{ appointment.patient.user.email }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-phone me-1"></i>Phone</h6>
+                            <p>{{ appointment.patient.phone|default:"Not provided" }}</p>
+                            
+                            <h6><i class="fas fa-birthday-cake me-1"></i>Date of Birth</h6>
+                            <p>{{ appointment.patient.date_of_birth|date:"F d, Y"|default:"Not provided" }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-calendar-check me-1"></i>Appointment Status</h6>
+                        <span class="status-badge status-{{ appointment.status }}">
+                            {{ appointment.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-clock me-1"></i>Booked On</h6>
+                        <p>{{ appointment.created_at|date:"M d, Y g:i A" }}</p>
+                    </div>
+                </div>
+                
+                {% if appointment.reason %}
+                    <div class="mt-3">
+                        <h6><i class="fas fa-notes-medical me-1"></i>Reason for Visit</h6>
+                        <p class="bg-light p-3 rounded">{{ appointment.reason }}</p>
+                    </div>
+                {% endif %}
+                
+                {% if appointment.notes %}
+                    <div class="mt-3">
+                        <h6><i class="fas fa-sticky-note me-1"></i>Doctor's Notes</h6>
+                        <p class="bg-light p-3 rounded">{{ appointment.notes }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+        
+        <!-- Status Update Form (if booked) -->
+        {% if appointment and appointment.patient and status_form %}
+            <div class="slot-info-card">
+                <h5><i class="fas fa-edit me-2"></i>Update Appointment</h5>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ status_form.status.id_for_label }}" class="form-label">
+                                    <i class="fas fa-flag me-1"></i>Status
+                                </label>
+                                {{ status_form.status }}
+                                {% if status_form.status.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in status_form.status.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ status_form.notes.id_for_label }}" class="form-label">
+                            <i class="fas fa-sticky-note me-1"></i>Notes
+                        </label>
+                        {{ status_form.notes }}
+                        {% if status_form.notes.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in status_form.notes.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <button type="submit" class="btn btn-doctor">
+                        <i class="fas fa-save me-2"></i>Update Appointment
+                    </button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <!-- Quick Actions -->
+        <div class="slot-info-card">
+            <h6><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+            
+            <div class="d-grid gap-2">
+                <a href="{% url 'doctor:appointment_calendar' %}" class="btn btn-outline-doctor">
+                    <i class="fas fa-calendar-alt me-2"></i>Back to Calendar
+                </a>
+                
+                <a href="{% url 'doctor:appointment_list' %}" class="btn btn-outline-doctor">
+                    <i class="fas fa-list me-2"></i>All Slots
+                </a>
+                
+                {% if not appointment or not appointment.patient %}
+                    <a href="{% url 'doctor:delete_slot' slot.id %}" class="btn btn-outline-danger">
+                        <i class="fas fa-trash me-2"></i>Delete Slot
+                    </a>
+                {% endif %}
+                
+                <a href="{% url 'doctor:create_appointment_slots' %}?date={{ slot.date|date:'Y-m-d' }}" class="btn btn-doctor">
+                    <i class="fas fa-plus me-2"></i>Create More Slots
+                </a>
+            </div>
+        </div>
+        
+        <!-- Slot Information Summary -->
+        <div class="slot-info-card">
+            <h6><i class="fas fa-info-circle me-2"></i>Slot Information</h6>
+            
+            <div class="mb-2">
+                <strong>Slot Type:</strong><br>
+                <small class="text-muted">{{ slot.get_slot_type_display }}</small>
+            </div>
+            
+            <div class="mb-2">
+                <strong>Duration:</strong><br>
+                <small class="text-muted">90 minutes (1.5 hours)</small>
+            </div>
+            
+            <div class="mb-2">
+                <strong>Status:</strong><br>
+                {% if appointment and appointment.patient %}
+                    <small class="text-success">Booked by patient</small>
+                {% else %}
+                    <small class="text-primary">Available for booking</small>
+                {% endif %}
+            </div>
+            
+            {% if appointment and appointment.patient %}
+                <div class="mb-2">
+                    <strong>Last Updated:</strong><br>
+                    <small class="text-muted">{{ appointment.updated_at|date:"M d, Y g:i A" }}</small>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Related Slots (same day) -->
+        {% if doctor %}
+            {% with same_day_slots='' %}
+                {% comment %} Get other slots for the same day {% endcomment %}
+                <div class="slot-info-card">
+                    <h6><i class="fas fa-calendar-day me-2"></i>Other Slots Today</h6>
+                    
+                    {% for other_slot in doctor.appointment_slots.all %}
+                        {% if other_slot.date == slot.date and other_slot.id != slot.id %}
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                                <div>
+                                    <strong>{{ other_slot.get_slot_type_display }}</strong><br>
+                                    <small class="text-muted">{{ other_slot.start_time|time:"g:i A" }}</small>
+                                </div>
+                                <div>
+                                    {% if other_slot.appointment.patient %}
+                                        <span class="badge bg-success">Booked</span>
+                                    {% else %}
+                                        <span class="badge bg-primary">Available</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% empty %}
+                        <p class="text-muted small">No other slots for this day</p>
+                    {% endfor %}
+                </div>
+            {% endwith %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-refresh every 5 minutes to check for updates
+        setTimeout(function() {
+            location.reload();
+        }, 300000);
+    });
+</script>
+{% endblock %} 

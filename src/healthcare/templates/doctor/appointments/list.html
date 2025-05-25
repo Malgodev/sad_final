@@ -1,0 +1,251 @@
+{% extends 'doctor/base.html' %}
+
+{% block title %}Appointment Slots List - Doctor Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .filter-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .slot-card {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .slot-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+    
+    .slot-status {
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 0.8em;
+        font-weight: bold;
+    }
+    
+    .slot-status.available {
+        background: #e8f5e8;
+        color: #2e7d32;
+    }
+    
+    .slot-status.booked {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+    
+    .slot-time {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: var(--doctor-primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>
+                <i class="fas fa-list me-2"></i>Appointment Slots
+            </h3>
+            <div>
+                <a href="{% url 'doctor:create_appointment_slots' %}" class="btn btn-doctor">
+                    <i class="fas fa-plus me-2"></i>Create Slots
+                </a>
+                <a href="{% url 'doctor:bulk_create_slots' %}" class="btn btn-outline-doctor ms-2">
+                    <i class="fas fa-calendar-week me-2"></i>Bulk Create
+                </a>
+                <a href="{% url 'doctor:appointment_calendar' %}" class="btn btn-outline-doctor ms-2">
+                    <i class="fas fa-calendar-alt me-2"></i>Calendar View
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <!-- Filters -->
+        <div class="filter-card">
+            <h6><i class="fas fa-filter me-2"></i>Filters</h6>
+            
+            <form method="get" id="filter-form">
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select name="status" id="status" class="form-select form-select-sm">
+                        <option value="">All Slots</option>
+                        <option value="available" {% if status_filter == 'available' %}selected{% endif %}>Available</option>
+                        <option value="booked" {% if status_filter == 'booked' %}selected{% endif %}>Booked</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="date" class="form-label">Date</label>
+                    <input type="date" name="date" id="date" class="form-control form-control-sm" value="{{ date_filter }}">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="slot_type" class="form-label">Time Slot</label>
+                    <select name="slot_type" id="slot_type" class="form-select form-select-sm">
+                        <option value="">All Times</option>
+                        {% for value, label in slot_choices %}
+                            <option value="{{ value }}" {% if slot_type_filter == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-doctor btn-sm">
+                        <i class="fas fa-search me-1"></i>Apply Filters
+                    </button>
+                    <a href="{% url 'doctor:appointment_list' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-times me-1"></i>Clear Filters
+                    </a>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Summary -->
+        <div class="filter-card">
+            <h6><i class="fas fa-chart-bar me-2"></i>Summary</h6>
+            
+            <div class="mb-2">
+                <strong>Total Slots:</strong> {{ slots.count }}
+            </div>
+            
+            <div class="mb-2">
+                <strong>Available:</strong> 
+                <span class="text-success">
+                    {% for slot in slots %}
+                        {% if not slot.appointment.patient %}{{ forloop.counter0|add:1 }}{% endif %}
+                    {% empty %}0{% endfor %}
+                </span>
+            </div>
+            
+            <div class="mb-2">
+                <strong>Booked:</strong> 
+                <span class="text-info">
+                    {% for slot in slots %}
+                        {% if slot.appointment.patient %}{{ forloop.counter0|add:1 }}{% endif %}
+                    {% empty %}0{% endfor %}
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <!-- Slots List -->
+        {% if slots %}
+            {% for slot in slots %}
+                <div class="slot-card" data-slot-url="{% url 'doctor:slot_detail' slot.id %}">
+                    <div class="row align-items-center">
+                        <div class="col-md-3">
+                            <div class="slot-time">{{ slot.start_time|time:"g:i A" }}</div>
+                            <small class="text-muted">{{ slot.get_slot_type_display }}</small>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <strong>{{ slot.date|date:"M d, Y" }}</strong><br>
+                            <small class="text-muted">{{ slot.date|date:"l" }}</small>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            {% if slot.appointment.patient %}
+                                <strong>{{ slot.appointment.patient.user.get_full_name }}</strong><br>
+                                <small class="text-muted">{{ slot.appointment.patient.user.email }}</small>
+                            {% else %}
+                                <span class="text-muted">No patient assigned</span><br>
+                                <small class="text-success">Available for booking</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-3 text-end">
+                            {% if slot.appointment.patient %}
+                                <span class="slot-status booked">
+                                    <i class="fas fa-user me-1"></i>Booked
+                                </span>
+                                {% if slot.appointment.status %}
+                                    <br><small class="text-muted mt-1">{{ slot.appointment.get_status_display }}</small>
+                                {% endif %}
+                            {% else %}
+                                <span class="slot-status available">
+                                    <i class="fas fa-check-circle me-1"></i>Available
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if slot.appointment.patient and slot.appointment.reason %}
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <small class="text-muted">
+                                    <i class="fas fa-notes-medical me-1"></i>
+                                    {{ slot.appointment.reason|truncatechars:100 }}
+                                </small>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            
+            <!-- Pagination would go here if needed -->
+            
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">No appointment slots found</h5>
+                <p class="text-muted">
+                    {% if status_filter or date_filter or slot_type_filter %}
+                        Try adjusting your filters or 
+                        <a href="{% url 'doctor:appointment_list' %}">clear all filters</a>.
+                    {% else %}
+                        Create your first appointment slots to get started.
+                    {% endif %}
+                </p>
+                <a href="{% url 'doctor:create_appointment_slots' %}" class="btn btn-doctor">
+                    <i class="fas fa-plus me-2"></i>Create Appointment Slots
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle slot card clicks
+        const slotCards = document.querySelectorAll('.slot-card[data-slot-url]');
+        slotCards.forEach(function(card) {
+            card.addEventListener('click', function() {
+                window.location.href = this.getAttribute('data-slot-url');
+            });
+        });
+        
+        // Auto-submit form on filter changes
+        const filterForm = document.getElementById('filter-form');
+        const filterInputs = filterForm.querySelectorAll('select, input');
+        
+        filterInputs.forEach(function(input) {
+            input.addEventListener('change', function() {
+                // Small delay to allow user to make multiple selections
+                setTimeout(function() {
+                    filterForm.submit();
+                }, 300);
+            });
+        });
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,305 @@
+{% extends 'patient/base.html' %}
+
+{% block title %}Patient Dashboard - Healthcare System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Welcome Header -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h2 class="text-patient mb-2">
+                            <i class="fas fa-user-injured me-2"></i>
+                            Welcome back, {{ patient.user.first_name }}!
+                        </h2>
+                        <p class="text-muted mb-0">
+                            Manage your appointments and health information from your personal dashboard.
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <a href="{% url 'patient:appointment_calendar' %}" class="btn btn-patient btn-lg">
+                            <i class="fas fa-calendar-plus me-2"></i>Book Appointment
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="stats-number">{{ upcoming_appointments|length }}</div>
+            <div class="stats-label">Upcoming Appointments</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="stats-number">{{ total_appointments }}</div>
+            <div class="stats-label">Total Appointments</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="stats-number">{{ completed_appointments }}</div>
+            <div class="stats-label">Completed Visits</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <a href="{% url 'patient:appointment_list' %}" class="btn btn-outline-patient w-100">
+                <i class="fas fa-list me-2"></i>View All
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Upcoming Appointments -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="mb-0">
+                            <i class="fas fa-clock me-2"></i>
+                            Upcoming Appointments
+                        </h5>
+                    </div>
+                    <div class="col-auto">
+                        <a href="{% url 'patient:appointment_list' %}" class="btn btn-outline-patient btn-sm">
+                            View All
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if upcoming_appointments %}
+                    {% for appointment in upcoming_appointments %}
+                    <div class="d-flex align-items-center p-3 mb-3 border rounded">
+                        <div class="me-3">
+                            <div class="bg-patient text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-user-md"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">Dr. {{ appointment.doctor.user.get_full_name }}</h6>
+                            <p class="text-muted mb-1">{{ appointment.doctor.specialization }}</p>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>
+                                {{ appointment.appointment_slot.date|date:"M d, Y" }}
+                                <i class="fas fa-clock ms-2 me-1"></i>
+                                {{ appointment.appointment_slot.get_slot_type_display }}
+                            </small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-info mb-2">{{ appointment.get_status_display }}</span><br>
+                            <a href="{% url 'patient:appointment_detail' appointment.id %}" class="btn btn-outline-patient btn-sm">
+                                <i class="fas fa-eye me-1"></i>View
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <h6 class="text-muted">No upcoming appointments</h6>
+                        <p class="text-muted mb-3">Book your next appointment to stay on top of your health.</p>
+                        <a href="{% url 'patient:appointment_calendar' %}" class="btn btn-patient">
+                            <i class="fas fa-calendar-plus me-2"></i>Book Appointment
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i>
+                    Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <a href="{% url 'patient:appointment_calendar' %}" class="btn btn-outline-patient w-100 p-3">
+                            <i class="fas fa-calendar-plus fa-2x mb-2 d-block"></i>
+                            <strong>Book Appointment</strong><br>
+                            <small>Schedule with available doctors</small>
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="{% url 'patient:appointment_list' %}" class="btn btn-outline-patient w-100 p-3">
+                            <i class="fas fa-list fa-2x mb-2 d-block"></i>
+                            <strong>My Appointments</strong><br>
+                            <small>View and manage appointments</small>
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="{% url 'patient:profile' %}" class="btn btn-outline-patient w-100 p-3">
+                            <i class="fas fa-user-edit fa-2x mb-2 d-block"></i>
+                            <strong>Update Profile</strong><br>
+                            <small>Manage personal information</small>
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="/selftest/" class="btn btn-outline-patient w-100 p-3">
+                            <i class="fas fa-stethoscope fa-2x mb-2 d-block"></i>
+                            <strong>Health Self-Test</strong><br>
+                            <small>AI-powered symptom checker</small>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <!-- Patient Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-user me-2"></i>
+                    Your Information
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <div class="patient-avatar">
+                        <i class="fas fa-user-circle fa-4x text-patient"></i>
+                    </div>
+                    <h6 class="mt-2 text-patient">{{ patient.user.get_full_name }}</h6>
+                    <small class="text-muted">Patient ID: #{{ patient.id }}</small>
+                </div>
+                
+                <div class="text-start">
+                    <p class="mb-2">
+                        <i class="fas fa-envelope me-2 text-patient"></i>
+                        <strong>Email:</strong> {{ patient.user.email }}
+                    </p>
+                    {% if patient.phone %}
+                    <p class="mb-2">
+                        <i class="fas fa-phone me-2 text-patient"></i>
+                        <strong>Phone:</strong> {{ patient.phone }}
+                    </p>
+                    {% endif %}
+                    {% if patient.date_of_birth %}
+                    <p class="mb-2">
+                        <i class="fas fa-birthday-cake me-2 text-patient"></i>
+                        <strong>DOB:</strong> {{ patient.date_of_birth|date:"M d, Y" }}
+                    </p>
+                    {% endif %}
+                    {% if patient.gender %}
+                    <p class="mb-2">
+                        <i class="fas fa-venus-mars me-2 text-patient"></i>
+                        <strong>Gender:</strong> {{ patient.get_gender_display }}
+                    </p>
+                    {% endif %}
+                </div>
+                
+                <div class="text-center mt-3">
+                    <a href="{% url 'patient:profile' %}" class="btn btn-outline-patient btn-sm">
+                        <i class="fas fa-edit me-1"></i>Update Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Tips -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    Health Tips
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-heart me-2"></i>Stay Healthy!</h6>
+                    <ul class="mb-0">
+                        <li>Schedule regular checkups</li>
+                        <li>Stay hydrated and exercise regularly</li>
+                        <li>Get adequate sleep (7-9 hours)</li>
+                        <li>Maintain a balanced diet</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Contact -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-phone-alt me-2"></i>
+                    Emergency Contact
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Emergency: 911</h6>
+                    <p class="mb-0">For immediate medical emergencies, call 911 or go to the nearest emergency room.</p>
+                </div>
+                
+                {% if patient.emergency_contact %}
+                <p class="mb-2">
+                    <strong>Personal Emergency Contact:</strong><br>
+                    {{ patient.emergency_contact }}
+                    {% if patient.emergency_phone %}
+                        <br>{{ patient.emergency_phone }}
+                    {% endif %}
+                </p>
+                {% endif %}
+                
+                <p class="mb-0">
+                    <strong>Patient Support:</strong><br>
+                    support@healthcare.com
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add welcome animation
+        const welcomeCard = document.querySelector('.card');
+        welcomeCard.style.opacity = '0';
+        welcomeCard.style.transform = 'translateY(20px)';
+        
+        setTimeout(function() {
+            welcomeCard.style.transition = 'all 0.5s ease';
+            welcomeCard.style.opacity = '1';
+            welcomeCard.style.transform = 'translateY(0)';
+        }, 100);
+        
+        // Add hover effects to quick action buttons
+        const actionButtons = document.querySelectorAll('.btn-outline-patient');
+        actionButtons.forEach(function(button) {
+            button.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+            
+            button.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+        
+        // Auto-refresh upcoming appointments every 5 minutes
+        setInterval(function() {
+            // Only refresh if user is still on the page
+            if (document.visibilityState === 'visible') {
+                location.reload();
+            }
+        }, 300000); // 5 minutes
+    });
+</script>
+{% endblock %} 

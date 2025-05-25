@@ -1,0 +1,32 @@
+graph TD
+  gateway[API Gateway]
+  healthcare[Healthcare Project] 
+  appointment[Appointment App]
+  doctor[Doctor App]
+  patient[Patient App]
+  selftest[SelfTest App]
+  sqlite[(SQLite DB)]
+
+  gateway --> healthcare
+
+  healthcare --> appointment
+  healthcare --> doctor
+  healthcare --> patient
+  healthcare --> selftest
+
+  appointment --> patient
+  appointment --> doctor
+  selftest --> patient
+
+  appointment --> sqlite
+  doctor --> sqlite
+  patient --> sqlite
+  selftest --> sqlite
+
+  style gateway fill:#f9f,stroke:#333,stroke-width:4px
+  style healthcare fill:#f9f,stroke:#333,stroke-width:4px
+  style appointment fill:#bbf,stroke:#333,stroke-width:2px
+  style doctor fill:#bbf,stroke:#333,stroke-width:2px
+  style patient fill:#bbf,stroke:#333,stroke-width:2px
+  style selftest fill:#bbf,stroke:#333,stroke-width:2px
+  style sqlite fill:#ffe4c4,stroke:#333,stroke-width:2px

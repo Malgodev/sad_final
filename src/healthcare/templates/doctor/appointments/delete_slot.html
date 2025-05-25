@@ -1,0 +1,85 @@
+{% extends 'doctor/base.html' %}
+
+{% block title %}Delete Slot - Doctor Portal{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-trash me-2"></i>Delete Appointment Slot
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning!</strong> You are about to delete this appointment slot permanently.
+                </div>
+                
+                <h5>Slot Details:</h5>
+                <div class="bg-light p-3 rounded mb-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Date:</strong><br>
+                            {{ slot.date|date:"l, F d, Y" }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Time:</strong><br>
+                            {{ slot.get_slot_type_display }}
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <strong>Duration:</strong><br>
+                            {{ slot.start_time|time:"g:i A" }} - {{ slot.end_time|time:"g:i A" }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Status:</strong><br>
+                            {% if slot.appointment.patient %}
+                                <span class="text-danger">Booked (Cannot Delete)</span>
+                            {% else %}
+                                <span class="text-success">Available</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                {% if slot.appointment.patient %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-ban me-2"></i>
+                        <strong>Cannot Delete!</strong> This slot is booked by a patient. 
+                        You must cancel the appointment first before deleting the slot.
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'doctor:slot_detail' slot.id %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Slot
+                        </a>
+                        <a href="{% url 'doctor:appointment_calendar' %}" class="btn btn-primary">
+                            <i class="fas fa-calendar-alt me-2"></i>Back to Calendar
+                        </a>
+                    </div>
+                {% else %}
+                    <p class="text-muted">
+                        This action cannot be undone. The appointment slot will be permanently removed 
+                        and will no longer be available for patient booking.
+                    </p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'doctor:slot_detail' slot.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-2"></i>Delete Slot
+                            </button>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
