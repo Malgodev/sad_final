@@ -1,1 +1,1 @@
-# Management commands for selftest app 
+# Management commands package for selftest app 

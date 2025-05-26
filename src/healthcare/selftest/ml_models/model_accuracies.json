@@ -1,0 +1,22 @@
+{
+  "random_forest": {
+    "test_accuracy": 0.6866666666666666,
+    "cv_accuracy": 0.6813333333333333,
+    "cv_std": 0.0630202789231812
+  },
+  "svm": {
+    "test_accuracy": 0.6866666666666666,
+    "cv_accuracy": 0.7133333333333333,
+    "cv_std": 0.054487511311206806
+  },
+  "neural_network": {
+    "test_accuracy": 0.7466666666666667,
+    "cv_accuracy": 0.736,
+    "cv_std": 0.030579586509812566
+  },
+  "naive_bayes": {
+    "test_accuracy": 0.28,
+    "cv_accuracy": 0.30133333333333334,
+    "cv_std": 0.04139779919002672
+  }
+}
