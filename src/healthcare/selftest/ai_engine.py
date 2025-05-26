@@ -2,14 +2,20 @@ import json
 import os
 from typing import List, Dict, Tuple
 from django.conf import settings
+from .ml_models import HealthMLEngine
 
 
 class HealthAIEngine:
-    """AI Engine for symptom analysis and disease prediction"""
+    """AI Engine for symptom analysis and disease prediction with ML capabilities"""
     
     def __init__(self):
         self.symptoms_data = self._load_symptoms()
         self.diseases_data = self._load_diseases()
+        self.ml_engine = HealthMLEngine()
+        
+        # Train models if not already trained
+        if not self.ml_engine.is_trained:
+            self._train_ml_models()
     
     def _load_symptoms(self) -> Dict:
         """Load symptoms data from JSON file"""
@@ -58,7 +64,7 @@ class HealthAIEngine:
     
     def analyze_symptoms(self, symptom_reports: List[Dict]) -> Dict:
         """
-        Analyze symptoms and predict diseases with confidence scores
+        Analyze symptoms and predict diseases with AI/ML models and rule-based fallback
         
         Args:
             symptom_reports: List of dicts with 'symptom_name', 'severity', 'duration_days'
@@ -74,6 +80,22 @@ class HealthAIEngine:
                 'specialist_referral': None
             }
         
+        # Try ML prediction first
+        try:
+            ml_result = self.ml_engine.predict_disease(symptom_reports, use_ensemble=True)
+            
+            # If ML prediction is successful and confident, use it
+            if ml_result.get('ml_confidence', 0) > 40:  # 40% threshold for ML confidence
+                return ml_result
+                
+        except Exception as e:
+            print(f"ML prediction failed: {str(e)}")
+        
+        # Fallback to rule-based prediction
+        return self._rule_based_prediction(symptom_reports)
+    
+    def _rule_based_prediction(self, symptom_reports: List[Dict]) -> Dict:
+        """Rule-based prediction as fallback when ML models fail"""
         # Extract symptom names and severities
         reported_symptoms = {report['symptom_name'].lower(): report['severity'] for report in symptom_reports}
         
@@ -108,7 +130,9 @@ class HealthAIEngine:
             'predicted_diseases': disease_scores[:5],  # Top 5 predictions
             'risk_level': overall_risk,
             'recommendations': recommendations,
-            'specialist_referral': specialist_referral
+            'specialist_referral': specialist_referral,
+            'ml_confidence': 0.0,
+            'model_used': 'rule_based'
         }
     
     def _calculate_disease_confidence(self, disease: Dict, reported_symptoms: Dict) -> float:
@@ -216,4 +240,23 @@ class HealthAIEngine:
         for symptom in self.symptoms_data.get('symptoms', []):
             if symptom['name'].lower() == name.lower():
                 return symptom
-        return None 
+        return None
+    
+    def _train_ml_models(self) -> Dict[str, float]:
+        """Train ML models and return accuracies"""
+        try:
+            print("Training AI models... This may take a few minutes.")
+            accuracies = self.ml_engine.train_models()
+            print("AI model training completed!")
+            return accuracies
+        except Exception as e:
+            print(f"ML model training failed: {str(e)}")
+            return {}
+    
+    def get_model_comparison(self) -> Dict:
+        """Get performance comparison of all ML models"""
+        return self.ml_engine.get_model_comparison()
+    
+    def force_retrain_models(self) -> Dict[str, float]:
+        """Force retrain all ML models"""
+        return self.ml_engine.train_models()
