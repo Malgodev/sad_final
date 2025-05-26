@@ -206,8 +206,11 @@
                                 </option>
                             {% endfor %}
                         </select>
-                        <a href="{% url 'patient:appointment_list' %}" class="btn btn-patient">
+                        <a href="{% url 'patient:appointment_list' %}" class="btn btn-patient me-2">
                             <i class="fas fa-list me-1"></i>My Appointments
+                        </a>
+                        <a href="{% url 'appointment:chatbot' %}" class="btn btn-outline-patient">
+                            <i class="fas fa-robot me-1"></i>AI Assistant
                         </a>
                     </form>
                 </div>

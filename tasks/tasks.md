@@ -108,3 +108,49 @@ Dependencies: None
     - When check a symptoms, it show as a list in the between symptoms check list and the submit button.
 - **Dashboard**: Patient health analytics and test history
 - **Responsive UI**: Bootstrap-styled mobile-friendly interface
+
+## PATIENT-03: Implement Patient profile
+Status: ✅ COMPLETED
+Priority: High
+Dependencies: None
+
+### Requirements
+- When login, patient can go to dashboard then select profile to modify information
+
+### Acceptance Criteria 
+1. Patient can modify information ✅ COMPLETED 
+
+# DOCTOR-03: Implement doctor profile
+Status: ✅ COMPLETED
+Priority: High
+Dependencies: None
+
+### Requirements
+- When login, doctor can go to dashboard then select profile to modify information
+
+### Acceptance Criteria 
+1. Doctor can modify information like (name, dob, etc), the key information can't change like license id, etc ✅ COMPLETED
+
+## APPOINTMENT-02: Implement APPOINTMENT ai chatbot
+Status: ✅ COMPLETED
+Priority: High
+Dependencies: None
+
+### Requirements
+- When login, patient can go to appointment, there will be a box for chatbot, here it will recommend the best doctor based on user diease, user can type the diese and other criteria
+
+### Acceptance Criteria 
+1. The doctor with Specialization will be recommened to user ✅ COMPLETED
+
+## APPOINTMENT-03: Implement APPOINTMENT ai chatbot
+Status: ✅ COMPLETED
+Priority: High
+Dependencies: None
+
+### Requirements
+- When login, patient can go to appointment, there will be a box for chatbot, here it will recommend the best doctor based on user diease, user can type the diese and other criteria
+
+
+### Acceptance Criteria 
+1. The doctor with Specialization will be recommened to user ✅ COMPLETED
+2. The link to the doctor with corresponding specialization (or related specialization) will be send in the chat ✅ COMPLETED

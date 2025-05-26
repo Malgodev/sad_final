@@ -1,0 +1,615 @@
+{% extends 'patient/base.html' %}
+
+{% block title %}AI Appointment Assistant - Patient Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chatbot-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    .chat-window {
+        height: 500px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 15px;
+        padding: 20px;
+        background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+        margin-bottom: 20px;
+    }
+    
+    .message {
+        margin-bottom: 15px;
+        padding: 12px 16px;
+        border-radius: 18px;
+        max-width: 80%;
+        word-wrap: break-word;
+    }
+    
+    .message.user {
+        background: var(--patient-primary);
+        color: white;
+        margin-left: auto;
+        text-align: right;
+    }
+    
+    .message.bot {
+        background: white;
+        color: #333;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .message.system {
+        background: #e3f2fd;
+        color: #1565c0;
+        text-align: center;
+        margin: 0 auto;
+        font-style: italic;
+    }
+    
+    .doctor-card {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px 0;
+        transition: all 0.3s ease;
+    }
+    
+    .doctor-card:hover {
+        box-shadow: 0 4px 15px rgba(233, 30, 99, 0.2);
+        transform: translateY(-2px);
+    }
+    
+    .relevance-score {
+        background: var(--patient-primary);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: bold;
+    }
+    
+    .input-section {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .quick-suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+    }
+    
+    .suggestion-btn {
+        background: var(--patient-light);
+        border: 1px solid var(--patient-primary);
+        color: var(--patient-primary);
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .suggestion-btn:hover {
+        background: var(--patient-primary);
+        color: white;
+    }
+    
+    .typing-indicator {
+        display: none;
+        align-items: center;
+        gap: 5px;
+        color: #666;
+        font-style: italic;
+    }
+    
+    .typing-dots {
+        display: flex;
+        gap: 3px;
+    }
+    
+    .typing-dot {
+        width: 6px;
+        height: 6px;
+        background: var(--patient-primary);
+        border-radius: 50%;
+        animation: typing 1.4s infinite ease-in-out;
+    }
+    
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+    
+    @keyframes typing {
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1); }
+    }
+    
+    .confidence-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: bold;
+        margin-left: 10px;
+    }
+    
+    .confidence-high { background: #4caf50; color: white; }
+    .confidence-medium { background: #ff9800; color: white; }
+    .confidence-low { background: #f44336; color: white; }
+    
+    .specialization-tag {
+        background: var(--patient-secondary);
+        color: var(--patient-dark);
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.8em;
+        margin: 2px;
+        display: inline-block;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'patient:dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'patient:appointment_calendar' %}">Appointments</a></li>
+        <li class="breadcrumb-item active">AI Assistant</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="chatbot-container">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4 class="mb-0">
+                                <i class="fas fa-robot me-2"></i>
+                                AI Appointment Assistant
+                            </h4>
+                            <p class="mb-0 text-muted">Get personalized doctor recommendations based on your symptoms</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <span class="badge bg-success">
+                                <i class="fas fa-circle me-1"></i>Online
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Window -->
+    <div class="row">
+        <div class="col-12">
+            <div class="chat-window" id="chatWindow">
+                <div class="message system">
+                    <i class="fas fa-robot me-2"></i>
+                    Hello {{ patient.user.first_name }}! I'm your AI appointment assistant. 
+                    Describe your symptoms or health concerns, and I'll recommend the best doctors for you.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Typing Indicator -->
+    <div class="typing-indicator" id="typingIndicator">
+        <i class="fas fa-robot me-2"></i>
+        AI Assistant is thinking
+        <div class="typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        </div>
+    </div>
+
+    <!-- Input Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="input-section">
+                <form id="chatForm">
+                    <div class="row">
+                        <div class="col-md-10">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-comment-medical"></i>
+                                </span>
+                                <textarea 
+                                    class="form-control" 
+                                    id="userMessage" 
+                                    placeholder="Describe your symptoms or health concerns... (e.g., 'I have chest pain and shortness of breath')"
+                                    rows="2"
+                                    required></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-patient w-100" id="sendButton">
+                                <i class="fas fa-paper-plane me-2"></i>Send
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Suggestions -->
+                    <div class="mt-3">
+                        <small class="text-muted">Quick suggestions:</small>
+                        <div class="quick-suggestions">
+                            {% for suggestion in quick_suggestions %}
+                                <button type="button" class="suggestion-btn" onclick="useSuggestion('{{ suggestion }}')">
+                                    {{ suggestion }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Options -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-sliders-h me-2"></i>
+                        Advanced Criteria (Optional)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="minExperience" class="form-label">Minimum Experience (years)</label>
+                            <select class="form-select" id="minExperience">
+                                <option value="">Any experience level</option>
+                                <option value="5">5+ years</option>
+                                <option value="10">10+ years</option>
+                                <option value="15">15+ years</option>
+                                <option value="20">20+ years</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="urgency" class="form-label">Urgency Level</label>
+                            <select class="form-select" id="urgency">
+                                <option value="routine">Routine (within weeks)</option>
+                                <option value="soon">Soon (within days)</option>
+                                <option value="urgent">Urgent (within hours)</option>
+                                <option value="emergency">Emergency (immediate)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-question-circle me-2"></i>
+                        How to Use the AI Assistant
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>What to Include:</h6>
+                            <ul>
+                                <li>Specific symptoms you're experiencing</li>
+                                <li>Duration of symptoms</li>
+                                <li>Severity level</li>
+                                <li>Any relevant medical history</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Example Queries:</h6>
+                            <ul>
+                                <li>"I have severe headaches for 3 days"</li>
+                                <li>"Chest pain and difficulty breathing"</li>
+                                <li>"Need diabetes management specialist"</li>
+                                <li>"Skin rash that's getting worse"</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Note:</strong> This AI assistant provides recommendations only. For emergencies, call 911 immediately.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatForm = document.getElementById('chatForm');
+        const userMessageInput = document.getElementById('userMessage');
+        const chatWindow = document.getElementById('chatWindow');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+        
+        // Auto-resize textarea
+        userMessageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+        
+        // Handle form submission
+        chatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            sendMessage();
+        });
+        
+        // Handle Enter key (Shift+Enter for new line)
+        userMessageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        function sendMessage() {
+            const message = userMessageInput.value.trim();
+            if (!message) return;
+            
+            // Add user message to chat
+            addMessage(message, 'user');
+            
+            // Clear input
+            userMessageInput.value = '';
+            userMessageInput.style.height = 'auto';
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Prepare criteria
+            const criteria = {
+                min_experience: document.getElementById('minExperience').value,
+                urgency: document.getElementById('urgency').value
+            };
+            
+            // Send to API
+            fetch('{% url "appointment:chatbot_analyze" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    message: message,
+                    criteria: criteria
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideTypingIndicator();
+                
+                if (data.success) {
+                    // Add bot response
+                    addMessage(data.response, 'bot');
+                    
+                    // Add confidence badge
+                    if (data.confidence) {
+                        addConfidenceBadge(data.confidence);
+                    }
+                    
+                    // Add doctor recommendations
+                    if (data.doctors && data.doctors.length > 0) {
+                        addDoctorRecommendations(data.doctors);
+                    }
+                    
+                                         // Add specializations info
+                     if (data.specializations && data.specializations.length > 0) {
+                         addSpecializationsInfo(data.specializations);
+                         
+                         // Add quick links for top specialization
+                         if (data.specializations[0]) {
+                             addSpecializationLinks(data.specializations[0].name);
+                         }
+                     }
+                } else {
+                    addMessage(data.error || 'Sorry, I encountered an error. Please try again.', 'bot');
+                }
+            })
+            .catch(error => {
+                hideTypingIndicator();
+                addMessage('Sorry, I encountered a technical error. Please try again later.', 'bot');
+                console.error('Error:', error);
+            });
+        }
+        
+        function addMessage(text, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            if (type === 'user') {
+                messageDiv.innerHTML = `<i class="fas fa-user me-2"></i>${text}`;
+            } else {
+                // Convert URLs to clickable links and add emojis
+                let formattedText = text.replace(/\n/g, '<br>');
+                
+                // Make profile links clickable
+                formattedText = formattedText.replace(
+                    /📋 Profile: (\/doctor\/profile\/\d+\/)/g, 
+                    '📋 <a href="$1" class="text-primary fw-bold" target="_blank">View Doctor Profile</a>'
+                );
+                
+                // Make booking links clickable
+                formattedText = formattedText.replace(
+                    /📅 Book: (\/patient\/appointments\/calendar\/\?doctor=\d+)/g, 
+                    '📅 <a href="$1" class="text-success fw-bold" target="_blank">Book Appointment</a>'
+                );
+                
+                // Make full profile URLs clickable
+                formattedText = formattedText.replace(
+                    /📋 View full profile: (\/doctor\/profile\/\d+\/)/g, 
+                    '📋 <a href="$1" class="text-primary fw-bold" target="_blank">View Full Profile</a>'
+                );
+                
+                // Make booking URLs clickable
+                formattedText = formattedText.replace(
+                    /📅 Book appointment: (\/patient\/appointments\/calendar\/\?doctor=\d+)/g, 
+                    '📅 <a href="$1" class="text-success fw-bold" target="_blank">Book Appointment</a>'
+                );
+                
+                messageDiv.innerHTML = `<i class="fas fa-robot me-2"></i>${formattedText}`;
+            }
+            
+            chatWindow.appendChild(messageDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+        
+        function addConfidenceBadge(confidence) {
+            const badgeDiv = document.createElement('div');
+            badgeDiv.className = 'message bot';
+            
+            let badgeClass = 'confidence-low';
+            if (confidence >= 70) badgeClass = 'confidence-high';
+            else if (confidence >= 50) badgeClass = 'confidence-medium';
+            
+            badgeDiv.innerHTML = `
+                <i class="fas fa-chart-line me-2"></i>
+                Recommendation Confidence: 
+                <span class="confidence-badge ${badgeClass}">${confidence}%</span>
+            `;
+            
+            chatWindow.appendChild(badgeDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+        
+        function addDoctorRecommendations(doctors) {
+            const doctorsDiv = document.createElement('div');
+            doctorsDiv.className = 'message bot';
+            
+            let doctorsHtml = '<i class="fas fa-user-md me-2"></i><strong>Recommended Doctors:</strong><br><br>';
+            
+            doctors.forEach((doctor, index) => {
+                doctorsHtml += `
+                    <div class="doctor-card">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">Dr. ${doctor.name}</h6>
+                                <p class="mb-1 text-muted">${doctor.specialization}</p>
+                                <small class="text-muted">${doctor.experience_years} years experience</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="relevance-score">${doctor.relevance_score}% match</span>
+                                <br>
+                                <div class="btn-group mt-2" role="group">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewDoctorProfile(${doctor.id})">
+                                        <i class="fas fa-user-md me-1"></i>Profile
+                                    </button>
+                                    <button class="btn btn-sm btn-primary" onclick="viewDoctorAvailability(${doctor.id})">
+                                        <i class="fas fa-calendar me-1"></i>Book Now
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            doctorsDiv.innerHTML = doctorsHtml;
+            chatWindow.appendChild(doctorsDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+        
+                 function addSpecializationsInfo(specializations) {
+             const specsDiv = document.createElement('div');
+             specsDiv.className = 'message bot';
+             
+             let specsHtml = '<i class="fas fa-tags me-2"></i><strong>Relevant Specializations:</strong><br><br>';
+             
+             specializations.forEach(spec => {
+                 specsHtml += `<span class="specialization-tag">${spec.name} (${spec.relevance}% relevant)</span>`;
+             });
+             
+             specsDiv.innerHTML = specsHtml;
+             chatWindow.appendChild(specsDiv);
+             chatWindow.scrollTop = chatWindow.scrollHeight;
+         }
+         
+         function addSpecializationLinks(specialization) {
+             // Fetch and display direct links to doctors in this specialization
+             fetch(`/appointment/api/specialization/${encodeURIComponent(specialization)}/doctors/`, {
+                 method: 'GET',
+                 headers: {
+                     'X-CSRFToken': getCookie('csrftoken')
+                 }
+             })
+             .then(response => response.json())
+             .then(data => {
+                 if (data.links_message) {
+                     addMessage(data.links_message, 'bot');
+                 }
+             })
+             .catch(error => {
+                 console.error('Error fetching specialization links:', error);
+             });
+         }
+        
+        function showTypingIndicator() {
+            typingIndicator.style.display = 'flex';
+            sendButton.disabled = true;
+            sendButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+        }
+        
+        function hideTypingIndicator() {
+            typingIndicator.style.display = 'none';
+            sendButton.disabled = false;
+            sendButton.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Send';
+        }
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Focus on input when page loads
+        userMessageInput.focus();
+    });
+    
+    function useSuggestion(suggestion) {
+        document.getElementById('userMessage').value = suggestion;
+        document.getElementById('userMessage').focus();
+    }
+    
+    function viewDoctorProfile(doctorId) {
+        // Redirect to doctor's public profile
+        window.location.href = `/doctor/profile/${doctorId}/`;
+    }
+    
+    function viewDoctorAvailability(doctorId) {
+        // Redirect to appointment calendar with doctor filter
+        window.location.href = `{% url 'patient:appointment_calendar' %}?doctor=${doctorId}`;
+    }
+</script>
+{% endblock %} 

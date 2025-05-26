@@ -1,7 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from .models import Patient
+from .forms import PatientProfileForm
 
 def patient_home(request):
     return HttpResponse("""
@@ -50,12 +52,29 @@ def patient_dashboard(request):
     except Patient.DoesNotExist:
         return render(request, 'patient/profile_setup.html')
 
+@login_required
 def patient_profile(request):
-    return HttpResponse("""
-    <h1>Patient Profile</h1>
-    <p>Patient profile management coming soon...</p>
-    <a href="/patient/">Back to Patient Portal</a>
-    """)
+    try:
+        patient = Patient.objects.get(user=request.user)
+    except Patient.DoesNotExist:
+        messages.error(request, "Please complete your patient profile first.")
+        return redirect('patient:dashboard')
+    
+    if request.method == 'POST':
+        form = PatientProfileForm(request.POST, instance=patient, user=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your profile has been updated successfully!')
+            return redirect('patient:profile')
+    else:
+        form = PatientProfileForm(instance=patient, user=request.user)
+    
+    context = {
+        'patient': patient,
+        'form': form,
+    }
+    
+    return render(request, 'patient/profile.html', context)
 
 def patient_appointments(request):
     return HttpResponse("""

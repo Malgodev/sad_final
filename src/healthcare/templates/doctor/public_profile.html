@@ -1,0 +1,312 @@
+{% extends 'patient/base.html' %}
+
+{% block title %}Dr. {{ doctor.user.get_full_name }} - Doctor Profile{% endblock %}
+
+{% block extra_css %}
+<style>
+    .doctor-profile-header {
+        background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .doctor-avatar {
+        width: 120px;
+        height: 120px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+    }
+    
+    .specialization-badge {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        margin: 5px;
+        display: inline-block;
+    }
+    
+    .experience-badge {
+        background: #4caf50;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 15px;
+        font-size: 0.85em;
+        font-weight: bold;
+    }
+    
+    .slot-card {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px 0;
+        transition: all 0.3s ease;
+    }
+    
+    .slot-card:hover {
+        box-shadow: 0 4px 15px rgba(33, 150, 243, 0.2);
+        transform: translateY(-2px);
+    }
+    
+    .info-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .contact-info {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px 0;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'patient:dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'appointment:chatbot' %}">AI Assistant</a></li>
+        <li class="breadcrumb-item active">Dr. {{ doctor.user.last_name }}</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Doctor Profile Header -->
+    <div class="doctor-profile-header">
+        <div class="row align-items-center">
+            <div class="col-md-3 text-center">
+                <div class="doctor-avatar">
+                    <i class="fas fa-user-md fa-4x"></i>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <h2 class="mb-2">Dr. {{ doctor.user.get_full_name }}</h2>
+                <div class="specialization-badge">
+                    <i class="fas fa-stethoscope me-2"></i>{{ doctor.specialization }}
+                </div>
+                <div class="experience-badge mt-2">
+                    <i class="fas fa-award me-2"></i>{{ doctor.experience_years }} years experience
+                </div>
+                <p class="mt-3 mb-0">
+                    <i class="fas fa-certificate me-2"></i>
+                    Licensed Medical Professional - License #{{ doctor.license_number }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Doctor Information -->
+        <div class="col-md-8">
+            <div class="info-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Professional Information
+                </h5>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="contact-info">
+                            <h6><i class="fas fa-user-md me-2"></i>Specialization</h6>
+                            <p class="mb-0">{{ doctor.specialization }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="contact-info">
+                            <h6><i class="fas fa-calendar me-2"></i>Experience</h6>
+                            <p class="mb-0">{{ doctor.experience_years }} years in practice</p>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if doctor.phone %}
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="contact-info">
+                            <h6><i class="fas fa-phone me-2"></i>Contact</h6>
+                            <p class="mb-0">{{ doctor.phone }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="contact-info">
+                            <h6><i class="fas fa-check-circle me-2"></i>Status</h6>
+                            <span class="badge bg-success">Approved & Active</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Available Appointment Slots -->
+            <div class="info-card">
+                <div class="row align-items-center mb-3">
+                    <div class="col">
+                        <h5 class="mb-0">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            Available Appointment Slots
+                        </h5>
+                    </div>
+                    <div class="col-auto">
+                        <a href="{% url 'patient:appointment_calendar' %}?doctor={{ doctor.id }}" class="btn btn-patient">
+                            <i class="fas fa-calendar-plus me-2"></i>View All Slots
+                        </a>
+                    </div>
+                </div>
+                
+                {% if available_slots %}
+                    <div class="row">
+                        {% for slot in available_slots %}
+                        <div class="col-md-6">
+                            <div class="slot-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ slot.date|date:"M d, Y" }}</h6>
+                                        <p class="mb-1 text-muted">{{ slot.get_slot_type_display }}</p>
+                                        <small class="text-muted">
+                                            {{ slot.start_time|time:"H:i" }} - {{ slot.end_time|time:"H:i" }}
+                                        </small>
+                                    </div>
+                                    <div>
+                                        <a href="{% url 'patient:book_appointment' slot.id %}" class="btn btn-sm btn-patient">
+                                            <i class="fas fa-calendar-plus me-1"></i>Book
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <h6 class="text-muted">No available slots in the next 30 days</h6>
+                        <p class="text-muted mb-3">Please check back later or contact the doctor directly.</p>
+                        <a href="{% url 'patient:appointment_calendar' %}" class="btn btn-outline-patient">
+                            <i class="fas fa-search me-2"></i>Find Other Doctors
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Quick Actions -->
+            <div class="info-card">
+                <h6 class="mb-3">
+                    <i class="fas fa-bolt me-2"></i>
+                    Quick Actions
+                </h6>
+                
+                <div class="d-grid gap-2">
+                    <a href="{% url 'patient:appointment_calendar' %}?doctor={{ doctor.id }}" class="btn btn-patient">
+                        <i class="fas fa-calendar-plus me-2"></i>Book Appointment
+                    </a>
+                    <a href="{% url 'appointment:chatbot' %}" class="btn btn-outline-patient">
+                        <i class="fas fa-robot me-2"></i>AI Assistant
+                    </a>
+                    <a href="{% url 'patient:appointment_list' %}" class="btn btn-outline-patient">
+                        <i class="fas fa-list me-2"></i>My Appointments
+                    </a>
+                </div>
+            </div>
+
+            <!-- Specialization Info -->
+            <div class="info-card">
+                <h6 class="mb-3">
+                    <i class="fas fa-stethoscope me-2"></i>
+                    About {{ doctor.specialization }}
+                </h6>
+                
+                <div class="alert alert-info">
+                    {% if doctor.specialization == "Cardiology" %}
+                        <p class="mb-0">Specializes in heart and cardiovascular system disorders. Treats conditions like heart disease, high blood pressure, and chest pain.</p>
+                    {% elif doctor.specialization == "Pulmonology" %}
+                        <p class="mb-0">Focuses on lung and respiratory system health. Treats asthma, pneumonia, bronchitis, and other breathing-related conditions.</p>
+                    {% elif doctor.specialization == "Gastroenterology" %}
+                        <p class="mb-0">Specializes in digestive system disorders. Treats stomach pain, acid reflux, ulcers, and other gastrointestinal conditions.</p>
+                    {% elif doctor.specialization == "Neurology" %}
+                        <p class="mb-0">Focuses on brain and nervous system disorders. Treats headaches, seizures, stroke, and neurological conditions.</p>
+                    {% elif doctor.specialization == "Orthopedics" %}
+                        <p class="mb-0">Specializes in bone, joint, and muscle disorders. Treats fractures, arthritis, back pain, and musculoskeletal conditions.</p>
+                    {% elif doctor.specialization == "Dermatology" %}
+                        <p class="mb-0">Focuses on skin, hair, and nail conditions. Treats acne, eczema, skin rashes, and dermatological disorders.</p>
+                    {% elif doctor.specialization == "Internal Medicine" %}
+                        <p class="mb-0">Provides comprehensive adult medical care. Handles general health concerns, chronic diseases, and preventive care.</p>
+                    {% else %}
+                        <p class="mb-0">Specialized medical professional providing expert care in {{ doctor.specialization }}.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="info-card">
+                <h6 class="mb-3">
+                    <i class="fas fa-phone-alt me-2"></i>
+                    Contact Information
+                </h6>
+                
+                {% if doctor.phone %}
+                <p class="mb-2">
+                    <i class="fas fa-phone me-2"></i>
+                    <strong>Phone:</strong> {{ doctor.phone }}
+                </p>
+                {% endif %}
+                
+                <p class="mb-2">
+                    <i class="fas fa-envelope me-2"></i>
+                    <strong>Email:</strong> {{ doctor.user.email }}
+                </p>
+                
+                <p class="mb-0">
+                    <i class="fas fa-certificate me-2"></i>
+                    <strong>License:</strong> #{{ doctor.license_number }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add hover effects to slot cards
+        const slotCards = document.querySelectorAll('.slot-card');
+        slotCards.forEach(function(card) {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+        
+        // Add animation to profile header
+        const profileHeader = document.querySelector('.doctor-profile-header');
+        profileHeader.style.opacity = '0';
+        profileHeader.style.transform = 'translateY(20px)';
+        
+        setTimeout(function() {
+            profileHeader.style.transition = 'all 0.6s ease';
+            profileHeader.style.opacity = '1';
+            profileHeader.style.transform = 'translateY(0)';
+        }, 100);
+    });
+</script>
+{% endblock %} 

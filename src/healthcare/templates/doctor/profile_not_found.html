@@ -1,0 +1,47 @@
+{% extends 'patient/base.html' %}
+
+{% block title %}Doctor Not Found - Healthcare System{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'patient:dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'appointment:chatbot' %}">AI Assistant</a></li>
+        <li class="breadcrumb-item active">Doctor Not Found</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Doctor Profile Not Available
+                </h4>
+            </div>
+            <div class="card-body text-center py-5">
+                <i class="fas fa-user-md fa-5x text-muted mb-4"></i>
+                <h5 class="text-warning">{{ error }}</h5>
+                <p class="text-muted mb-4">
+                    The doctor profile you're looking for is not available or may have been removed.
+                </p>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="{% url 'appointment:chatbot' %}" class="btn btn-patient">
+                        <i class="fas fa-robot me-2"></i>AI Assistant
+                    </a>
+                    <a href="{% url 'patient:appointment_calendar' %}" class="btn btn-outline-patient">
+                        <i class="fas fa-search me-2"></i>Find Other Doctors
+                    </a>
+                    <a href="{% url 'patient:dashboard' %}" class="btn btn-outline-patient">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

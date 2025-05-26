@@ -10,6 +10,9 @@ urlpatterns = [
     path('dashboard/', views.doctor_dashboard, name='dashboard'),
     path('profile/', views.doctor_profile, name='profile'),
     
+    # Public doctor profile (accessible by patients)
+    path('profile/<int:doctor_id>/', views.public_doctor_profile, name='public_profile'),
+    
     # Doctor Authentication URLs (separate from patient login)
     path('auth/', DoctorLoginView.as_view(), name='auth_login'),
     path('auth/register/', DoctorRegistrationView.as_view(), name='auth_register'),

@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
 from .models import Doctor
+from .forms import DoctorProfileForm
 from appointment.models import Appointment
 
 def doctor_home(request):
@@ -90,8 +91,18 @@ def doctor_profile(request):
             messages.error(request, 'Your account is not yet approved.')
             return redirect('doctor:auth_login')
         
+        if request.method == 'POST':
+            form = DoctorProfileForm(request.POST, instance=doctor, user=request.user)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Your profile has been updated successfully!')
+                return redirect('doctor:profile')
+        else:
+            form = DoctorProfileForm(instance=doctor, user=request.user)
+        
         context = {
             'doctor': doctor,
+            'form': form,
         }
         
         return render(request, 'doctor/profile.html', context)
@@ -99,3 +110,37 @@ def doctor_profile(request):
     except Doctor.DoesNotExist:
         messages.error(request, 'Doctor profile not found.')
         return redirect('doctor:auth_login')
+
+@login_required
+def public_doctor_profile(request, doctor_id):
+    """Public doctor profile view accessible by patients"""
+    try:
+        doctor = Doctor.objects.get(id=doctor_id, approval_status='approved')
+    except Doctor.DoesNotExist:
+        return render(request, 'doctor/profile_not_found.html', {
+            'error': 'Doctor not found or not available.'
+        })
+    
+    # Get doctor's available slots for the next 30 days
+    from datetime import date, timedelta
+    from appointment.models import AppointmentSlot
+    
+    today = date.today()
+    end_date = today + timedelta(days=30)
+    
+    available_slots = AppointmentSlot.objects.filter(
+        doctor=doctor,
+        date__range=[today, end_date],
+        appointment__isnull=True
+    ).order_by('date', 'slot_type')[:10]
+    
+    # Get recent patient reviews/ratings (if implemented)
+    # For now, we'll use placeholder data
+    
+    context = {
+        'doctor': doctor,
+        'available_slots': available_slots,
+        'is_public_view': True,
+    }
+    
+    return render(request, 'doctor/public_profile.html', context)
